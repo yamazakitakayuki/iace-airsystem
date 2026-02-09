@@ -84,7 +84,6 @@ document.addEventListener('DOMContentLoaded', function() {
     flightDate.setDate(today.getDate() + 7 + (index * 3));
     dateInput.value = flightDate.toISOString().split('T')[0];
   });
-  });
 
   // Passenger button click handler
   document.getElementById('passengerButton').addEventListener('click', function(e) {
@@ -100,6 +99,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!dropdown.contains(e.target) && !button.contains(e.target)) {
       dropdown.classList.add('hidden');
     }
+  });
+
+  // Trip type change handler
+  const tripTypeRadios = document.querySelectorAll('input[name="tripType"]');
+  tripTypeRadios.forEach(radio => {
+    radio.addEventListener('change', handleTripTypeChange);
   });
 
   // Cabin class change handler
