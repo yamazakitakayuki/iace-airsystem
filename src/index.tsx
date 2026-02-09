@@ -356,11 +356,11 @@ app.get('/', (c) => {
         </div>
       </footer>
 
-      <!-- Seat Class Selection Modal -->
+      {/* Seat Class Selection Modal */}
       <div id="seatClassModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
         <div class="flex items-center justify-center min-h-screen p-4">
           <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl relative">
-            <!-- Modal Header -->
+            {/* Modal Header */}
             <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-4 rounded-t-2xl">
               <div class="flex items-center justify-between">
                 <h2 id="modalTitle" class="text-2xl font-bold">
@@ -379,31 +379,31 @@ app.get('/', (c) => {
               </div>
             </div>
 
-            <!-- Modal Body -->
+            {/* Modal Body */}
             <div class="p-6 max-h-[70vh] overflow-y-auto">
-              <!-- Outbound Flight Section -->
+              {/* Outbound Flight Section */}
               <div class="mb-8">
                 <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
                   <i class="fas fa-plane-departure text-blue-600 mr-2"></i>
                   往路便
                 </h3>
                 <div id="outboundSeatClasses" class="space-y-3">
-                  <!-- Seat class options will be inserted here -->
+                  {/* Seat class options will be inserted here */}
                 </div>
               </div>
 
-              <!-- Return Flight Section -->
+              {/* Return Flight Section */}
               <div class="mb-6">
                 <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
                   <i class="fas fa-plane-arrival text-blue-600 mr-2"></i>
                   復路便
                 </h3>
                 <div id="returnSeatClasses" class="space-y-3">
-                  <!-- Seat class options will be inserted here -->
+                  {/* Seat class options will be inserted here */}
                 </div>
               </div>
 
-              <!-- Total Price Summary -->
+              {/* Total Price Summary */}
               <div class="bg-blue-50 rounded-lg p-4 mt-6">
                 <div class="flex justify-between items-center">
                   <div>
@@ -415,7 +415,7 @@ app.get('/', (c) => {
               </div>
             </div>
 
-            <!-- Modal Footer -->
+            {/* Modal Footer */}
             <div class="border-t border-gray-200 px-6 py-4 bg-gray-50 rounded-b-2xl">
               <div class="flex space-x-4">
                 <button 

@@ -127,3 +127,86 @@ input[type="date"]:hover::-webkit-calendar-picker-indicator {
   }
 }
 
+/* Modal animations */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+#seatClassModal:not(.hidden) {
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+#seatClassModal:not(.hidden) > div > div {
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+/* Seat class option styling */
+.seat-class-option {
+  position: relative;
+  overflow: hidden;
+}
+
+.seat-class-option::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.seat-class-option:hover::before {
+  left: 100%;
+}
+
+/* Focus styles for accessibility */
+.seat-class-option:focus {
+  outline: 3px solid #3B82F6;
+  outline-offset: 2px;
+}
+
+/* Disabled button styling */
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Modal responsive adjustments */
+@media (max-width: 768px) {
+  #seatClassModal > div {
+    padding: 1rem;
+  }
+  
+  #seatClassModal .max-w-4xl {
+    max-width: 100%;
+  }
+  
+  .seat-class-option {
+    flex-direction: column;
+  }
+  
+  .seat-class-option > div > div:last-child {
+    margin-left: 0;
+    margin-top: 1rem;
+    text-align: left;
+  }
+}
+

@@ -270,10 +270,296 @@ function generateSampleFlights(from, to, depDate, retDate) {
   }
 }
 
-// Select flight
+// Global variables for modal
+let currentFlightData = null;
+let selectedSeatClasses = {
+  outbound: null,
+  return: null
+};
+
+// Seat class data (will be fetched from Amadeus API later)
+const seatClassData = {
+  economy: {
+    name: 'エコノミー',
+    icon: 'fa-chair',
+    amenities: ['標準座席', '機内食付き', '受託手荷物 1個'],
+    cancellation: 'キャンセル料: 50%',
+    priceMultiplier: 1.0,
+    seatsAvailable: 12
+  },
+  premium_economy: {
+    name: 'プレミアムエコノミー',
+    icon: 'fa-couch',
+    amenities: ['広々とした座席', '優先搭乗', '機内食付き', '受託手荷物 2個'],
+    cancellation: 'キャンセル料: 30%',
+    priceMultiplier: 1.5,
+    seatsAvailable: 7
+  },
+  business: {
+    name: 'ビジネス',
+    icon: 'fa-briefcase',
+    amenities: ['フルフラットシート', 'ラウンジ利用', 'プレミアム機内食', '受託手荷物 3個'],
+    cancellation: 'キャンセル料: 20%',
+    priceMultiplier: 3.0,
+    seatsAvailable: 5
+  },
+  first: {
+    name: 'ファースト',
+    icon: 'fa-crown',
+    amenities: ['プライベートスイート', 'ラウンジ利用', 'シェフ監修機内食', '受託手荷物 無制限'],
+    cancellation: 'キャンセル無料',
+    priceMultiplier: 5.0,
+    seatsAvailable: 3
+  }
+};
+
+// Select flight - open modal
 function selectFlight(flightNumber, price) {
-  alert(`フライト ${flightNumber} を選択しました\n料金: ¥${price.toLocaleString()}\n\n※ Amadeus API統合後、予約処理が実装されます`);
+  currentFlightData = {
+    flightNumber: flightNumber,
+    basePrice: price,
+    route: {
+      from: 'TYO',
+      to: 'JFK',
+      fromCity: '東京',
+      toCity: 'ニューヨーク'
+    }
+  };
+
+  // Reset selections
+  selectedSeatClasses.outbound = null;
+  selectedSeatClasses.return = null;
+
+  // Open modal
+  openSeatClassModal();
 }
+
+// Open seat class modal
+function openSeatClassModal() {
+  const modal = document.getElementById('seatClassModal');
+  const modalRouteInfo = document.getElementById('modalRouteInfo');
+  const modalFlightInfo = document.getElementById('modalFlightInfo');
+  
+  // Update modal header
+  modalRouteInfo.textContent = `${currentFlightData.route.fromCity} → ${currentFlightData.route.toCity}`;
+  modalFlightInfo.innerHTML = `
+    <div class="flex items-center space-x-4">
+      <span><i class="fas fa-plane mr-1"></i> ${currentFlightData.flightNumber}</span>
+      <span><i class="fas fa-yen-sign mr-1"></i> 基本料金: ¥${currentFlightData.basePrice.toLocaleString()}</span>
+    </div>
+  `;
+  
+  // Generate seat class options
+  generateSeatClassOptions('outbound');
+  generateSeatClassOptions('return');
+  
+  // Show modal
+  modal.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+  
+  // Update total price
+  updateTotalPrice();
+  
+  // Focus on first seat class option for accessibility
+  setTimeout(() => {
+    const firstOption = modal.querySelector('.seat-class-option');
+    if (firstOption) firstOption.focus();
+  }, 100);
+}
+
+// Close seat class modal
+function closeSeatClassModal() {
+  const modal = document.getElementById('seatClassModal');
+  modal.classList.add('hidden');
+  document.body.style.overflow = 'auto';
+  
+  // Reset selections
+  selectedSeatClasses.outbound = null;
+  selectedSeatClasses.return = null;
+  currentFlightData = null;
+}
+
+// Generate seat class options
+function generateSeatClassOptions(direction) {
+  const container = direction === 'outbound' 
+    ? document.getElementById('outboundSeatClasses')
+    : document.getElementById('returnSeatClasses');
+  
+  container.innerHTML = '';
+  
+  Object.keys(seatClassData).forEach(classKey => {
+    const classInfo = seatClassData[classKey];
+    const price = Math.round(currentFlightData.basePrice * classInfo.priceMultiplier);
+    const isSelected = selectedSeatClasses[direction] === classKey;
+    
+    const optionHtml = `
+      <div 
+        class="seat-class-option border-2 rounded-lg p-4 cursor-pointer transition hover:shadow-lg ${
+          isSelected ? 'border-blue-600 bg-blue-50' : 'border-gray-200 hover:border-blue-400'
+        }"
+        onclick="selectSeatClass('${direction}', '${classKey}')"
+        role="button"
+        tabindex="0"
+        aria-pressed="${isSelected}"
+        onkeypress="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selectSeatClass('${direction}', '${classKey}'); }"
+      >
+        <div class="flex items-start justify-between">
+          <div class="flex-1">
+            <div class="flex items-center space-x-3 mb-2">
+              <i class="fas ${classInfo.icon} text-2xl ${isSelected ? 'text-blue-600' : 'text-gray-600'}"></i>
+              <div>
+                <h4 class="text-lg font-bold text-gray-800">${classInfo.name}</h4>
+                <p class="text-sm text-gray-500">残り${classInfo.seatsAvailable}席</p>
+              </div>
+            </div>
+            
+            <!-- Amenities -->
+            <div class="mb-3">
+              <div class="flex flex-wrap gap-2">
+                ${classInfo.amenities.map(amenity => `
+                  <span class="inline-flex items-center px-2 py-1 bg-gray-100 rounded text-xs text-gray-700">
+                    <i class="fas fa-check text-green-500 mr-1"></i>
+                    ${amenity}
+                  </span>
+                `).join('')}
+              </div>
+            </div>
+            
+            <!-- Cancellation Policy -->
+            <div class="text-sm text-gray-600">
+              <i class="fas fa-info-circle mr-1"></i>
+              ${classInfo.cancellation}
+            </div>
+          </div>
+          
+          <!-- Price and Selection -->
+          <div class="ml-4 text-right">
+            <div class="text-2xl font-bold text-blue-600">¥${price.toLocaleString()}</div>
+            <div class="text-xs text-gray-500 mt-1">片道 / 1名</div>
+            <div class="mt-3">
+              ${isSelected 
+                ? '<i class="fas fa-check-circle text-blue-600 text-2xl"></i>'
+                : '<i class="far fa-circle text-gray-400 text-2xl"></i>'
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    container.innerHTML += optionHtml;
+  });
+}
+
+// Select seat class
+function selectSeatClass(direction, classKey) {
+  selectedSeatClasses[direction] = classKey;
+  
+  // Regenerate options to show selection
+  generateSeatClassOptions(direction);
+  
+  // Update total price
+  updateTotalPrice();
+  
+  // Enable/disable confirm button
+  updateConfirmButton();
+}
+
+// Update total price
+function updateTotalPrice() {
+  const totalPriceElement = document.getElementById('modalTotalPrice');
+  
+  let totalPrice = 0;
+  
+  if (selectedSeatClasses.outbound) {
+    const outboundClass = seatClassData[selectedSeatClasses.outbound];
+    totalPrice += currentFlightData.basePrice * outboundClass.priceMultiplier;
+  }
+  
+  if (selectedSeatClasses.return) {
+    const returnClass = seatClassData[selectedSeatClasses.return];
+    totalPrice += currentFlightData.basePrice * returnClass.priceMultiplier;
+  }
+  
+  totalPriceElement.textContent = totalPrice > 0 
+    ? `¥${Math.round(totalPrice).toLocaleString()}`
+    : '¥0';
+}
+
+// Update confirm button state
+function updateConfirmButton() {
+  const confirmBtn = document.getElementById('confirmSelectionBtn');
+  const bothSelected = selectedSeatClasses.outbound && selectedSeatClasses.return;
+  
+  confirmBtn.disabled = !bothSelected;
+  
+  if (bothSelected) {
+    confirmBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    confirmBtn.classList.add('hover:from-blue-700', 'hover:to-indigo-700');
+  } else {
+    confirmBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    confirmBtn.classList.remove('hover:from-blue-700', 'hover:to-indigo-700');
+  }
+}
+
+// Confirm seat class selection
+function confirmSeatClassSelection() {
+  if (!selectedSeatClasses.outbound || !selectedSeatClasses.return) {
+    alert('往路と復路の両方の座席クラスを選択してください。');
+    return;
+  }
+  
+  // Calculate total price
+  const outboundPrice = currentFlightData.basePrice * seatClassData[selectedSeatClasses.outbound].priceMultiplier;
+  const returnPrice = currentFlightData.basePrice * seatClassData[selectedSeatClasses.return].priceMultiplier;
+  const totalPrice = Math.round(outboundPrice + returnPrice);
+  
+  // Prepare booking data
+  const bookingData = {
+    flight: currentFlightData.flightNumber,
+    route: currentFlightData.route,
+    seatClasses: {
+      outbound: {
+        class: selectedSeatClasses.outbound,
+        className: seatClassData[selectedSeatClasses.outbound].name,
+        price: Math.round(outboundPrice)
+      },
+      return: {
+        class: selectedSeatClasses.return,
+        className: seatClassData[selectedSeatClasses.return].name,
+        price: Math.round(returnPrice)
+      }
+    },
+    totalPrice: totalPrice
+  };
+  
+  // Close modal
+  closeSeatClassModal();
+  
+  // Show confirmation (will be replaced with actual booking flow)
+  alert(
+    `予約内容:\n\n` +
+    `フライト: ${bookingData.flight}\n` +
+    `ルート: ${bookingData.route.fromCity} → ${bookingData.route.toCity}\n\n` +
+    `往路: ${bookingData.seatClasses.outbound.className} - ¥${bookingData.seatClasses.outbound.price.toLocaleString()}\n` +
+    `復路: ${bookingData.seatClasses.return.className} - ¥${bookingData.seatClasses.return.price.toLocaleString()}\n\n` +
+    `合計金額: ¥${bookingData.totalPrice.toLocaleString()}\n\n` +
+    `※ Amadeus API統合後、予約処理が実装されます`
+  );
+  
+  console.log('Booking data:', bookingData);
+}
+
+// Keyboard accessibility for modal
+document.addEventListener('keydown', function(e) {
+  const modal = document.getElementById('seatClassModal');
+  if (!modal.classList.contains('hidden')) {
+    // Close modal on Escape key
+    if (e.key === 'Escape') {
+      closeSeatClassModal();
+    }
+  }
+});
 
 // Sort change handler
 document.addEventListener('DOMContentLoaded', function() {
