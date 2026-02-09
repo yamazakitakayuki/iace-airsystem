@@ -438,6 +438,235 @@ app.get('/', (c) => {
         </div>
       </div>
 
+      {/* Booking Confirmation Page */}
+      <div id="bookingPage" class="hidden">
+        <div class="container mx-auto px-4 py-8">
+          {/* Back Button */}
+          <button 
+            onclick="backToSearch()" 
+            class="mb-6 flex items-center text-blue-600 hover:text-blue-800 transition"
+          >
+            <i class="fas fa-arrow-left mr-2"></i>
+            検索結果に戻る
+          </button>
+
+          {/* Booking Header */}
+          <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+              <i class="fas fa-ticket-alt text-blue-600 mr-3"></i>
+              予約内容の確認
+            </h2>
+            <div class="bg-blue-50 border-l-4 border-blue-600 p-4 rounded">
+              <p class="text-sm text-gray-700">
+                <i class="fas fa-info-circle text-blue-600 mr-2"></i>
+                フライトと座席クラスを選択しました。次に座席を選択し、お客様情報を入力してください。
+              </p>
+            </div>
+          </div>
+
+          {/* Flight Summary */}
+          <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+            <h3 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+              <i class="fas fa-plane text-blue-600 mr-2"></i>
+              選択済みフライト情報
+            </h3>
+            <div id="flightSummary" class="space-y-4">
+              {/* Flight summary will be inserted here */}
+            </div>
+          </div>
+
+          {/* Seat Map Section */}
+          <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+            <h3 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+              <i class="fas fa-chair text-blue-600 mr-2"></i>
+              座席選択
+              <span class="ml-auto text-sm font-normal text-gray-600" id="seatSelectionStatus">
+                選択済み: <span id="selectedSeatsCount">0</span> / <span id="requiredSeats">1</span> 座席
+              </span>
+            </h3>
+            
+            {/* Seat Map Legend */}
+            <div class="flex flex-wrap gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+              <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-green-500 rounded flex items-center justify-center text-white text-xs font-bold">空</div>
+                <span class="text-sm text-gray-700">利用可能</span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-blue-600 rounded flex items-center justify-center text-white text-xs font-bold">選</div>
+                <span class="text-sm text-gray-700">選択済み</span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-gray-400 rounded flex items-center justify-center text-white text-xs font-bold">×</div>
+                <span class="text-sm text-gray-700">利用不可</span>
+              </div>
+              <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-yellow-500 rounded flex items-center justify-center text-white text-xs font-bold">特</div>
+                <span class="text-sm text-gray-700">特別席（追加料金）</span>
+              </div>
+            </div>
+
+            {/* Aircraft Map Container */}
+            <div class="aircraftmap_container mb-6">
+              <div class="od-aircraftmap-map-wrapper">
+                {/* Outbound Flight Seat Map */}
+                <div class="mb-8">
+                  <h4 class="text-lg font-bold text-gray-800 mb-3 flex items-center">
+                    <i class="fas fa-plane-departure text-blue-600 mr-2"></i>
+                    往路便 - 座席選択
+                  </h4>
+                  <div id="outboundSeatMap" class="od-aircraftmap-cabins">
+                    {/* Seat map will be generated here */}
+                  </div>
+                </div>
+
+                {/* Return Flight Seat Map */}
+                <div>
+                  <h4 class="text-lg font-bold text-gray-800 mb-3 flex items-center">
+                    <i class="fas fa-plane-arrival text-blue-600 mr-2"></i>
+                    復路便 - 座席選択
+                  </h4>
+                  <div id="returnSeatMap" class="od-aircraftmap-cabins">
+                    {/* Seat map will be generated here */}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Selected Seats Summary */}
+            <div class="bg-blue-50 rounded-lg p-4">
+              <h5 class="font-bold text-gray-800 mb-2">選択済み座席</h5>
+              <div id="selectedSeatsSummary" class="text-sm text-gray-700">
+                座席を選択してください
+              </div>
+            </div>
+          </div>
+
+          {/* Customer Information Form */}
+          <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+            <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+              <i class="fas fa-user-edit text-blue-600 mr-2"></i>
+              お客様情報
+            </h3>
+
+            <form id="customerInfoForm">
+              {/* Passenger Info (will be dynamically generated based on passenger count) */}
+              <div id="passengerFormsContainer">
+                {/* Passenger forms will be inserted here */}
+              </div>
+
+              {/* Contact Information */}
+              <div class="border-t border-gray-200 pt-6 mt-6">
+                <h4 class="text-xl font-bold text-gray-800 mb-4">連絡先情報</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      メールアドレス <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                      type="email" 
+                      id="contactEmail"
+                      required
+                      placeholder="example@email.com"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      電話番号 <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                      type="tel" 
+                      id="contactPhone"
+                      required
+                      placeholder="090-1234-5678"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Emergency Contact */}
+              <div class="border-t border-gray-200 pt-6 mt-6">
+                <h4 class="text-xl font-bold text-gray-800 mb-4">緊急連絡先</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      氏名
+                    </label>
+                    <input 
+                      type="text" 
+                      id="emergencyName"
+                      placeholder="山田 太郎"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      電話番号
+                    </label>
+                    <input 
+                      type="tel" 
+                      id="emergencyPhone"
+                      placeholder="090-1234-5678"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Terms and Conditions */}
+              <div class="border-t border-gray-200 pt-6 mt-6">
+                <label class="flex items-start space-x-3 cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    id="agreeTerms"
+                    required
+                    class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 mt-1"
+                  />
+                  <span class="text-sm text-gray-700">
+                    <a href="#" class="text-blue-600 hover:underline">利用規約</a>および
+                    <a href="#" class="text-blue-600 hover:underline">プライバシーポリシー</a>に同意します
+                    <span class="text-red-500">*</span>
+                  </span>
+                </label>
+              </div>
+            </form>
+          </div>
+
+          {/* Booking Summary and Submit */}
+          <div class="bg-white rounded-2xl shadow-xl p-6 sticky bottom-4">
+            <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+              <div>
+                <div class="text-sm text-gray-600 mb-1">合計金額</div>
+                <div class="text-4xl font-bold text-blue-600" id="finalTotalPrice">¥0</div>
+                <div class="text-xs text-gray-500 mt-1">
+                  <span id="totalPassengersCount">1</span>名分 • 往復 • 税・手数料込み
+                </div>
+              </div>
+              <div class="flex space-x-4 w-full md:w-auto">
+                <button 
+                  type="button"
+                  onclick="backToSearch()" 
+                  class="flex-1 md:flex-none bg-gray-200 text-gray-700 py-4 px-8 rounded-lg font-semibold hover:bg-gray-300 transition"
+                >
+                  キャンセル
+                </button>
+                <button 
+                  type="button"
+                  onclick="proceedToPayment()" 
+                  class="flex-1 md:flex-none bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 px-8 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition shadow-lg hover:shadow-xl"
+                  disabled
+                  id="proceedPaymentBtn"
+                >
+                  <i class="fas fa-credit-card mr-2"></i>
+                  支払いへ進む
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* JavaScript */}
       <script src="/static/app.js"></script>
     </div>

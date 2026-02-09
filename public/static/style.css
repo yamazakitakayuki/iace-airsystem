@@ -210,3 +210,325 @@ button:disabled {
   }
 }
 
+/* ========================================
+   Seat Map Styling
+   ======================================== */
+
+/* Aircraft map container */
+.aircraftmap_container {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.od-aircraftmap-map-wrapper {
+  min-width: 600px;
+}
+
+.od-aircraftmap-cabins {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+  border: 2px solid #e2e8f0;
+  border-radius: 1rem;
+}
+
+.od-aircraftmap-cabin {
+  width: 100%;
+  max-width: 800px;
+}
+
+/* Seat row styling */
+.seat-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.row-number {
+  width: 2rem;
+  text-align: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.seats {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* Individual seat styling */
+.seat {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.375rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.seat:hover:not(.cursor-not-allowed) {
+  transform: scale(1.1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.seat[data-status="available"] {
+  background-color: #10b981;
+  color: white;
+}
+
+.seat[data-status="available"]:hover {
+  background-color: #059669;
+}
+
+.seat[data-status="selected"] {
+  background-color: #3b82f6;
+  color: white;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+.seat[data-status="unavailable"] {
+  background-color: #9ca3af;
+  color: white;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.seat[data-price]:not([data-price="0"]) {
+  background-color: #eab308;
+  color: white;
+}
+
+.seat[data-price]:not([data-price="0"]):hover {
+  background-color: #ca8a04;
+}
+
+/* Aisle spacing */
+.aisle {
+  width: 2rem;
+}
+
+/* Seat map legend */
+.seat-map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.legend-seat {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.375rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* ========================================
+   Booking Page Styling
+   ======================================== */
+
+#bookingPage {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Flight summary cards */
+.flight-summary-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.flight-summary-card:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Customer form styling */
+#customerInfoForm input,
+#customerInfoForm select {
+  transition: all 0.2s ease;
+}
+
+#customerInfoForm input:focus,
+#customerInfoForm select:focus {
+  outline: none;
+  ring: 2px;
+  ring-color: #3b82f6;
+  border-color: transparent;
+}
+
+#customerInfoForm input[required]:invalid {
+  border-color: #ef4444;
+}
+
+#customerInfoForm input[required]:valid {
+  border-color: #10b981;
+}
+
+/* Sticky payment summary */
+.sticky {
+  position: sticky;
+  bottom: 1rem;
+  z-index: 40;
+}
+
+/* Selected seats summary */
+#selectedSeatsSummary {
+  min-height: 3rem;
+}
+
+/* ========================================
+   Responsive Design for Seat Map
+   ======================================== */
+
+@media (max-width: 1024px) {
+  .od-aircraftmap-map-wrapper {
+    min-width: 500px;
+  }
+  
+  .seat {
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.625rem;
+  }
+  
+  .row-number {
+    width: 1.5rem;
+    font-size: 0.75rem;
+  }
+  
+  .aisle {
+    width: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .aircraftmap_container {
+    overflow-x: scroll;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .od-aircraftmap-cabins {
+    padding: 1rem;
+  }
+  
+  .od-aircraftmap-map-wrapper {
+    min-width: 400px;
+  }
+  
+  .seat {
+    width: 1.75rem;
+    height: 1.75rem;
+    font-size: 0.5rem;
+  }
+  
+  .row-number {
+    width: 1.25rem;
+    font-size: 0.625rem;
+  }
+  
+  .aisle {
+    width: 1rem;
+  }
+  
+  /* Form adjustments */
+  #customerInfoForm .grid {
+    grid-template-columns: 1fr;
+  }
+  
+  /* Sticky button adjustments */
+  .sticky {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-radius: 0;
+    margin: 0;
+  }
+}
+
+/* ========================================
+   Accessibility Enhancements
+   ======================================== */
+
+/* Focus visible for keyboard navigation */
+.seat:focus-visible {
+  outline: 3px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .seat {
+    border: 2px solid currentColor;
+  }
+  
+  .seat[data-status="available"] {
+    border-color: #059669;
+  }
+  
+  .seat[data-status="selected"] {
+    border-color: #2563eb;
+  }
+  
+  .seat[data-status="unavailable"] {
+    border-color: #6b7280;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ========================================
+   Print Styles for Booking
+   ======================================== */
+
+@media print {
+  #bookingPage .sticky {
+    position: static;
+  }
+  
+  .aircraftmap_container {
+    overflow: visible;
+  }
+  
+  .seat:not([data-status="selected"]) {
+    opacity: 0.3;
+  }
+  
+  button {
+    display: none;
+  }
+}
+

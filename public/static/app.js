@@ -502,7 +502,19 @@ function updateConfirmButton() {
   }
 }
 
-// Confirm seat class selection
+// Global booking state
+let bookingState = {
+  flight: null,
+  seatClasses: null,
+  selectedSeats: {
+    outbound: [],
+    return: []
+  },
+  passengers: [],
+  totalPrice: 0
+};
+
+// Confirm seat class selection and proceed to booking page
 function confirmSeatClassSelection() {
   if (!selectedSeatClasses.outbound || !selectedSeatClasses.return) {
     alert('往路と復路の両方の座席クラスを選択してください。');
@@ -515,39 +527,550 @@ function confirmSeatClassSelection() {
   const totalPrice = Math.round(outboundPrice + returnPrice);
   
   // Prepare booking data
-  const bookingData = {
-    flight: currentFlightData.flightNumber,
-    route: currentFlightData.route,
-    seatClasses: {
-      outbound: {
-        class: selectedSeatClasses.outbound,
-        className: seatClassData[selectedSeatClasses.outbound].name,
-        price: Math.round(outboundPrice)
-      },
-      return: {
-        class: selectedSeatClasses.return,
-        className: seatClassData[selectedSeatClasses.return].name,
-        price: Math.round(returnPrice)
-      }
+  bookingState.flight = currentFlightData;
+  bookingState.seatClasses = {
+    outbound: {
+      class: selectedSeatClasses.outbound,
+      className: seatClassData[selectedSeatClasses.outbound].name,
+      price: Math.round(outboundPrice)
     },
-    totalPrice: totalPrice
+    return: {
+      class: selectedSeatClasses.return,
+      className: seatClassData[selectedSeatClasses.return].name,
+      price: Math.round(returnPrice)
+    }
   };
+  bookingState.totalPrice = totalPrice;
   
   // Close modal
   closeSeatClassModal();
   
-  // Show confirmation (will be replaced with actual booking flow)
-  alert(
-    `予約内容:\n\n` +
-    `フライト: ${bookingData.flight}\n` +
-    `ルート: ${bookingData.route.fromCity} → ${bookingData.route.toCity}\n\n` +
-    `往路: ${bookingData.seatClasses.outbound.className} - ¥${bookingData.seatClasses.outbound.price.toLocaleString()}\n` +
-    `復路: ${bookingData.seatClasses.return.className} - ¥${bookingData.seatClasses.return.price.toLocaleString()}\n\n` +
-    `合計金額: ¥${bookingData.totalPrice.toLocaleString()}\n\n` +
-    `※ Amadeus API統合後、予約処理が実装されます`
-  );
+  // Show booking page
+  showBookingPage();
+}
+
+// Show booking page
+function showBookingPage() {
+  // Hide search results
+  document.getElementById('searchResults').classList.add('hidden');
   
-  console.log('Booking data:', bookingData);
+  // Show booking page
+  document.getElementById('bookingPage').classList.remove('hidden');
+  
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  
+  // Generate flight summary
+  generateFlightSummary();
+  
+  // Generate seat maps
+  generateSeatMap('outbound');
+  generateSeatMap('return');
+  
+  // Generate passenger forms
+  generatePassengerForms();
+  
+  // Update total passengers count
+  const totalPassengers = passengers.adults + passengers.children + passengers.infants;
+  document.getElementById('totalPassengersCount').textContent = totalPassengers;
+  document.getElementById('requiredSeats').textContent = totalPassengers;
+  
+  // Update final total price (multiply by number of passengers)
+  updateFinalTotalPrice();
+}
+
+// Generate flight summary
+function generateFlightSummary() {
+  const summaryContainer = document.getElementById('flightSummary');
+  
+  const summary = `
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Outbound Flight -->
+      <div class="border border-gray-200 rounded-lg p-4">
+        <h4 class="font-bold text-gray-800 mb-3 flex items-center">
+          <i class="fas fa-plane-departure text-blue-600 mr-2"></i>
+          往路便
+        </h4>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span class="text-gray-600">便名:</span>
+            <span class="font-semibold">${bookingState.flight.flightNumber}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600">区間:</span>
+            <span class="font-semibold">${bookingState.flight.route.fromCity} (${bookingState.flight.route.from}) → ${bookingState.flight.route.toCity} (${bookingState.flight.route.to})</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600">座席クラス:</span>
+            <span class="font-semibold">${bookingState.seatClasses.outbound.className}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600">料金:</span>
+            <span class="font-semibold text-blue-600">¥${bookingState.seatClasses.outbound.price.toLocaleString()}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Return Flight -->
+      <div class="border border-gray-200 rounded-lg p-4">
+        <h4 class="font-bold text-gray-800 mb-3 flex items-center">
+          <i class="fas fa-plane-arrival text-blue-600 mr-2"></i>
+          復路便
+        </h4>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span class="text-gray-600">便名:</span>
+            <span class="font-semibold">${bookingState.flight.flightNumber}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600">区間:</span>
+            <span class="font-semibold">${bookingState.flight.route.toCity} (${bookingState.flight.route.to}) → ${bookingState.flight.route.fromCity} (${bookingState.flight.route.from})</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600">座席クラス:</span>
+            <span class="font-semibold">${bookingState.seatClasses.return.className}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-600">料金:</span>
+            <span class="font-semibold text-blue-600">¥${bookingState.seatClasses.return.price.toLocaleString()}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  summaryContainer.innerHTML = summary;
+}
+
+// Generate seat map
+function generateSeatMap(direction) {
+  const container = direction === 'outbound' 
+    ? document.getElementById('outboundSeatMap')
+    : document.getElementById('returnSeatMap');
+  
+  // Seat configuration based on class
+  const selectedClass = direction === 'outbound' 
+    ? bookingState.seatClasses.outbound.class 
+    : bookingState.seatClasses.return.class;
+  
+  let seatConfig;
+  if (selectedClass === 'economy') {
+    seatConfig = { rows: [18, 38], columns: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K'], aisles: [3, 7] };
+  } else if (selectedClass === 'premium_economy') {
+    seatConfig = { rows: [10, 17], columns: ['A', 'B', 'C', 'D', 'E', 'F'], aisles: [3] };
+  } else if (selectedClass === 'business') {
+    seatConfig = { rows: [5, 9], columns: ['A', 'B', 'D', 'E'], aisles: [2] };
+  } else { // first
+    seatConfig = { rows: [1, 4], columns: ['A', 'B'], aisles: [] };
+  }
+  
+  let mapHtml = '<div class="od-aircraftmap-cabin">';
+  
+  // Generate rows
+  for (let row = seatConfig.rows[0]; row <= seatConfig.rows[1]; row++) {
+    mapHtml += `<div class="seat-row flex items-center justify-center mb-2" data-row="${row}">`;
+    mapHtml += `<div class="row-number w-8 text-center text-sm font-bold text-gray-600">${row}</div>`;
+    mapHtml += `<div class="seats flex items-center space-x-1">`;
+    
+    seatConfig.columns.forEach((col, index) => {
+      // Add aisle space
+      if (seatConfig.aisles.includes(index)) {
+        mapHtml += `<div class="aisle w-8"></div>`;
+      }
+      
+      // Random seat status
+      const rand = Math.random();
+      let status = 'available';
+      let statusClass = 'bg-green-500 hover:bg-green-600';
+      let statusIcon = '空';
+      let price = 0;
+      let isPrime = false;
+      
+      if (rand > 0.7) {
+        status = 'unavailable';
+        statusClass = 'bg-gray-400 cursor-not-allowed';
+        statusIcon = '×';
+      } else if (rand > 0.6) {
+        status = 'available';
+        statusClass = 'bg-yellow-500 hover:bg-yellow-600';
+        statusIcon = '特';
+        price = 21009;
+        isPrime = true;
+      }
+      
+      const seatId = `${direction}-${row}${col}`;
+      
+      mapHtml += `
+        <div 
+          class="seat w-10 h-10 rounded flex items-center justify-center text-white text-xs font-bold cursor-pointer transition ${statusClass}"
+          data-seat-id="${seatId}"
+          data-direction="${direction}"
+          data-row="${row}"
+          data-column="${col}"
+          data-status="${status}"
+          data-price="${price}"
+          data-prime-price="${isPrime ? price : 0}"
+          onclick="toggleSeat('${seatId}')"
+          title="座席 ${row}${col}"
+        >
+          ${statusIcon}
+        </div>
+      `;
+    });
+    
+    mapHtml += `</div></div>`;
+  }
+  
+  mapHtml += '</div>';
+  
+  container.innerHTML = mapHtml;
+}
+
+// Toggle seat selection
+function toggleSeat(seatId) {
+  const seatElement = document.querySelector(`[data-seat-id="${seatId}"]`);
+  const status = seatElement.dataset.status;
+  const direction = seatElement.dataset.direction;
+  
+  if (status === 'unavailable') {
+    return; // Cannot select unavailable seats
+  }
+  
+  const currentSelected = bookingState.selectedSeats[direction];
+  const totalPassengers = passengers.adults + passengers.children + passengers.infants;
+  
+  if (status === 'available') {
+    // Check if we can select more seats
+    const totalSelectedCount = bookingState.selectedSeats.outbound.length + bookingState.selectedSeats.return.length;
+    if (totalSelectedCount >= totalPassengers * 2) {
+      alert(`既に必要な座席数（${totalPassengers * 2}席）を選択しています。`);
+      return;
+    }
+    
+    // Select seat
+    seatElement.dataset.status = 'selected';
+    seatElement.classList.remove('bg-green-500', 'hover:bg-green-600', 'bg-yellow-500', 'hover:bg-yellow-600');
+    seatElement.classList.add('bg-blue-600');
+    seatElement.innerHTML = '選';
+    
+    // Add to selected seats
+    currentSelected.push({
+      seatId: seatId,
+      row: seatElement.dataset.row,
+      column: seatElement.dataset.column,
+      price: parseInt(seatElement.dataset.price) || 0
+    });
+    
+  } else if (status === 'selected') {
+    // Deselect seat
+    const isPrime = parseInt(seatElement.dataset.primePrice) > 0;
+    seatElement.dataset.status = 'available';
+    seatElement.classList.remove('bg-blue-600');
+    
+    if (isPrime) {
+      seatElement.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
+      seatElement.innerHTML = '特';
+    } else {
+      seatElement.classList.add('bg-green-500', 'hover:bg-green-600');
+      seatElement.innerHTML = '空';
+    }
+    
+    // Remove from selected seats
+    const index = currentSelected.findIndex(s => s.seatId === seatId);
+    if (index > -1) {
+      currentSelected.splice(index, 1);
+    }
+  }
+  
+  // Update UI
+  updateSelectedSeatsDisplay();
+  updateProceedButton();
+}
+
+// Update selected seats display
+function updateSelectedSeatsDisplay() {
+  const totalSelected = bookingState.selectedSeats.outbound.length + bookingState.selectedSeats.return.length;
+  const totalPassengers = passengers.adults + passengers.children + passengers.infants;
+  const required = totalPassengers * 2; // Outbound + Return
+  
+  document.getElementById('selectedSeatsCount').textContent = totalSelected;
+  
+  // Update summary
+  const summaryContainer = document.getElementById('selectedSeatsSummary');
+  
+  if (totalSelected === 0) {
+    summaryContainer.innerHTML = '座席を選択してください';
+  } else {
+    let summaryHtml = '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">';
+    
+    // Outbound seats
+    summaryHtml += '<div><strong>往路:</strong> ';
+    if (bookingState.selectedSeats.outbound.length > 0) {
+      summaryHtml += bookingState.selectedSeats.outbound.map(s => `${s.row}${s.column}`).join(', ');
+    } else {
+      summaryHtml += '未選択';
+    }
+    summaryHtml += '</div>';
+    
+    // Return seats
+    summaryHtml += '<div><strong>復路:</strong> ';
+    if (bookingState.selectedSeats.return.length > 0) {
+      summaryHtml += bookingState.selectedSeats.return.map(s => `${s.row}${s.column}`).join(', ');
+    } else {
+      summaryHtml += '未選択';
+    }
+    summaryHtml += '</div>';
+    
+    summaryHtml += '</div>';
+    summaryContainer.innerHTML = summaryHtml;
+  }
+}
+
+// Generate passenger forms
+function generatePassengerForms() {
+  const container = document.getElementById('passengerFormsContainer');
+  let formsHtml = '';
+  
+  let passengerIndex = 1;
+  
+  // Adults
+  for (let i = 0; i < passengers.adults; i++) {
+    formsHtml += generatePassengerForm(passengerIndex, '大人', 'adult');
+    passengerIndex++;
+  }
+  
+  // Children
+  for (let i = 0; i < passengers.children; i++) {
+    formsHtml += generatePassengerForm(passengerIndex, '子供', 'child');
+    passengerIndex++;
+  }
+  
+  // Infants
+  for (let i = 0; i < passengers.infants; i++) {
+    formsHtml += generatePassengerForm(passengerIndex, '幼児', 'infant');
+    passengerIndex++;
+  }
+  
+  container.innerHTML = formsHtml;
+}
+
+// Generate single passenger form
+function generatePassengerForm(index, type, category) {
+  return `
+    <div class="mb-6 pb-6 border-b border-gray-200">
+      <h4 class="text-lg font-bold text-gray-800 mb-4">乗客 ${index} (${type})</h4>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            姓 <span class="text-red-500">*</span>
+          </label>
+          <input 
+            type="text" 
+            id="passenger${index}LastName"
+            data-passenger="${index}"
+            data-category="${category}"
+            required
+            placeholder="山田"
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            名 <span class="text-red-500">*</span>
+          </label>
+          <input 
+            type="text" 
+            id="passenger${index}FirstName"
+            data-passenger="${index}"
+            data-category="${category}"
+            required
+            placeholder="太郎"
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            性別 <span class="text-red-500">*</span>
+          </label>
+          <select 
+            id="passenger${index}Gender"
+            data-passenger="${index}"
+            data-category="${category}"
+            required
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="">選択してください</option>
+            <option value="male">男性</option>
+            <option value="female">女性</option>
+            <option value="other">その他</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            生年月日 <span class="text-red-500">*</span>
+          </label>
+          <input 
+            type="date" 
+            id="passenger${index}DOB"
+            data-passenger="${index}"
+            data-category="${category}"
+            required
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            パスポート番号 <span class="text-red-500">*</span>
+          </label>
+          <input 
+            type="text" 
+            id="passenger${index}Passport"
+            data-passenger="${index}"
+            data-category="${category}"
+            required
+            placeholder="TK1234567"
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            国籍 <span class="text-red-500">*</span>
+          </label>
+          <select 
+            id="passenger${index}Nationality"
+            data-passenger="${index}"
+            data-category="${category}"
+            required
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="">選択してください</option>
+            <option value="JP">日本</option>
+            <option value="US">アメリカ</option>
+            <option value="UK">イギリス</option>
+            <option value="CN">中国</option>
+            <option value="KR">韓国</option>
+            <option value="other">その他</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// Update final total price
+function updateFinalTotalPrice() {
+  const totalPassengers = passengers.adults + passengers.children + passengers.infants;
+  const baseTotal = bookingState.totalPrice * totalPassengers;
+  
+  // Add seat upgrade charges
+  let seatUpgradeTotal = 0;
+  bookingState.selectedSeats.outbound.forEach(seat => {
+    seatUpgradeTotal += seat.price;
+  });
+  bookingState.selectedSeats.return.forEach(seat => {
+    seatUpgradeTotal += seat.price;
+  });
+  
+  const finalTotal = baseTotal + seatUpgradeTotal;
+  document.getElementById('finalTotalPrice').textContent = `¥${finalTotal.toLocaleString()}`;
+}
+
+// Update proceed button
+function updateProceedButton() {
+  const btn = document.getElementById('proceedPaymentBtn');
+  const totalPassengers = passengers.adults + passengers.children + passengers.infants;
+  const requiredSeats = totalPassengers * 2; // Outbound + Return
+  const selectedSeats = bookingState.selectedSeats.outbound.length + bookingState.selectedSeats.return.length;
+  
+  if (selectedSeats === requiredSeats) {
+    btn.disabled = false;
+    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+  } else {
+    btn.disabled = true;
+    btn.classList.add('opacity-50', 'cursor-not-allowed');
+  }
+  
+  // Update final total price
+  updateFinalTotalPrice();
+}
+
+// Back to search
+function backToSearch() {
+  // Show search results
+  document.getElementById('searchResults').classList.remove('hidden');
+  
+  // Hide booking page
+  document.getElementById('bookingPage').classList.add('hidden');
+  
+  // Reset booking state
+  bookingState.selectedSeats = { outbound: [], return: [] };
+  
+  // Scroll to results
+  document.getElementById('searchResults').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Proceed to payment
+function proceedToPayment() {
+  // Validate form
+  const form = document.getElementById('customerInfoForm');
+  if (!form.checkValidity()) {
+    alert('すべての必須項目を入力してください。');
+    form.reportValidity();
+    return;
+  }
+  
+  // Check terms agreement
+  const agreeTerms = document.getElementById('agreeTerms').checked;
+  if (!agreeTerms) {
+    alert('利用規約およびプライバシーポリシーに同意してください。');
+    return;
+  }
+  
+  // Collect passenger data
+  const totalPassengers = passengers.adults + passengers.children + passengers.infants;
+  const passengerData = [];
+  
+  for (let i = 1; i <= totalPassengers; i++) {
+    passengerData.push({
+      index: i,
+      lastName: document.getElementById(`passenger${i}LastName`).value,
+      firstName: document.getElementById(`passenger${i}FirstName`).value,
+      gender: document.getElementById(`passenger${i}Gender`).value,
+      dob: document.getElementById(`passenger${i}DOB`).value,
+      passport: document.getElementById(`passenger${i}Passport`).value,
+      nationality: document.getElementById(`passenger${i}Nationality`).value,
+      category: document.getElementById(`passenger${i}LastName`).dataset.category
+    });
+  }
+  
+  // Collect contact data
+  const contactData = {
+    email: document.getElementById('contactEmail').value,
+    phone: document.getElementById('contactPhone').value,
+    emergencyName: document.getElementById('emergencyName').value,
+    emergencyPhone: document.getElementById('emergencyPhone').value
+  };
+  
+  // Prepare final booking data
+  const finalBookingData = {
+    flight: bookingState.flight,
+    seatClasses: bookingState.seatClasses,
+    selectedSeats: bookingState.selectedSeats,
+    passengers: passengerData,
+    contact: contactData,
+    totalPrice: parseInt(document.getElementById('finalTotalPrice').textContent.replace(/[¥,]/g, ''))
+  };
+  
+  console.log('Final booking data:', finalBookingData);
+  
+  // Show confirmation (will be replaced with actual payment flow)
+  alert(
+    `予約が確定しました！\n\n` +
+    `フライト: ${finalBookingData.flight.flightNumber}\n` +
+    `乗客数: ${totalPassengers}名\n` +
+    `合計金額: ¥${finalBookingData.totalPrice.toLocaleString()}\n\n` +
+    `※ Amadeus API統合後、実際の決済処理が実装されます`
+  );
 }
 
 // Keyboard accessibility for modal
