@@ -126,12 +126,38 @@ async function searchFlights() {
 
 // Generate sample flight cards
 function generateSampleFlights(from, to, depDate, retDate) {
+  // Airline logos using placeholder service (実際にはAmadeus APIから取得)
   const airlines = [
-    { name: '全日空 (ANA)', code: 'NH', logo: '✈️' },
-    { name: '日本航空 (JAL)', code: 'JL', logo: '✈️' },
-    { name: 'ユナイテッド航空', code: 'UA', logo: '✈️' },
-    { name: 'デルタ航空', code: 'DL', logo: '✈️' },
-    { name: 'アメリカン航空', code: 'AA', logo: '✈️' }
+    { 
+      name: '全日空 (ANA)', 
+      code: 'NH', 
+      logo: 'https://via.placeholder.com/80x40/003366/FFFFFF?text=ANA',
+      color: '#003366'
+    },
+    { 
+      name: '日本航空 (JAL)', 
+      code: 'JL', 
+      logo: 'https://via.placeholder.com/80x40/DC143C/FFFFFF?text=JAL',
+      color: '#DC143C'
+    },
+    { 
+      name: 'ユナイテッド航空', 
+      code: 'UA', 
+      logo: 'https://via.placeholder.com/80x40/004B87/FFFFFF?text=UA',
+      color: '#004B87'
+    },
+    { 
+      name: 'デルタ航空', 
+      code: 'DL', 
+      logo: 'https://via.placeholder.com/80x40/862633/FFFFFF?text=DL',
+      color: '#862633'
+    },
+    { 
+      name: 'アメリカン航空', 
+      code: 'AA', 
+      logo: 'https://via.placeholder.com/80x40/0078D2/FFFFFF?text=AA',
+      color: '#0078D2'
+    }
   ];
 
   const stops = [
@@ -158,7 +184,9 @@ function generateSampleFlights(from, to, depDate, retDate) {
           {/* Flight Info */}
           <div class="flex-1">
             <div class="flex items-center space-x-3 mb-4">
-              <span class="text-2xl">${airline.logo}</span>
+              <div class="w-20 h-10 bg-white border border-gray-200 rounded flex items-center justify-center overflow-hidden">
+                <img src="${airline.logo}" alt="${airline.name}" class="w-full h-full object-contain" />
+              </div>
               <div>
                 <div class="font-semibold text-gray-800">${airline.name}</div>
                 <div class="text-sm text-gray-500">${airline.code}${100 + i}</div>
