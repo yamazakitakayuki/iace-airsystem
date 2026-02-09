@@ -26,15 +26,16 @@ app.get('/', (c) => {
       </header>
 
       {/* Main Content */}
-      <main id="mainContent" class="container mx-auto px-4 py-8 flex-grow">
-        {/* Hero Section */}
-        <div class="text-center mb-8">
-          <h2 class="text-4xl font-bold text-gray-800 mb-2">お得な航空券を検索</h2>
-          <p class="text-gray-600">世界中のフライトを比較して、最安値を見つけましょう</p>
-        </div>
+      <main id="mainContent" class="flex-grow">
+        <div class="container mx-auto px-4 py-8">
+          {/* Hero Section */}
+          <div class="text-center mb-8">
+            <h2 class="text-4xl font-bold text-gray-800 mb-2">お得な航空券を検索</h2>
+            <p class="text-gray-600">世界中のフライトを比較して、最安値を見つけましょう</p>
+          </div>
 
-        {/* Search Form */}
-        <div class="bg-white rounded-2xl shadow-2xl p-6 md:p-8 mb-8">
+          {/* Search Form */}
+          <div class="bg-white rounded-2xl shadow-2xl p-6 md:p-8 mb-8">
           {/* Trip Type Selection */}
           <div class="flex flex-wrap gap-4 mb-6">
             <label class="flex items-center space-x-2 cursor-pointer">
@@ -323,38 +324,8 @@ app.get('/', (c) => {
             </div>
           </div>
         </div>
-      </main>
-
-      {/* Footer */}
-      <footer class="bg-gray-800 text-white flex-shrink-0 mt-auto">
-        <div class="container mx-auto px-4 py-8">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div>
-              <h5 class="font-bold text-lg mb-4">FlightSearch</h5>
-              <p class="text-gray-400">お得な航空券を簡単検索</p>
-            </div>
-            <div>
-              <h5 class="font-bold text-lg mb-4">リンク</h5>
-              <ul class="space-y-2 text-gray-400">
-                <li><a href="#" class="hover:text-white">利用規約</a></li>
-                <li><a href="#" class="hover:text-white">プライバシーポリシー</a></li>
-                <li><a href="#" class="hover:text-white">お問い合わせ</a></li>
-              </ul>
-            </div>
-            <div>
-              <h5 class="font-bold text-lg mb-4">フォロー</h5>
-              <div class="flex space-x-4">
-                <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook text-2xl"></i></a>
-                <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter text-2xl"></i></a>
-                <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-instagram text-2xl"></i></a>
-              </div>
-            </div>
-          </div>
-          <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2026 FlightSearch. All rights reserved.</p>
-          </div>
         </div>
-      </footer>
+      </main>
 
       {/* Seat Class Selection Modal */}
       <div id="seatClassModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
@@ -440,7 +411,7 @@ app.get('/', (c) => {
 
       {/* Booking Confirmation Page */}
       <div id="bookingPage" class="hidden flex-grow">
-        <div class="container mx-auto px-4 py-8">
+        <div class="container mx-auto px-4 py-8 min-h-full">
           {/* Back Button */}
           <button 
             onclick="backToSearch()" 
@@ -666,6 +637,37 @@ app.get('/', (c) => {
           </div>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer class="bg-gray-800 text-white flex-shrink-0 mt-auto">
+        <div class="container mx-auto px-4 py-8">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+              <h5 class="font-bold text-lg mb-4">FlightSearch</h5>
+              <p class="text-gray-400">お得な航空券を簡単検索</p>
+            </div>
+            <div>
+              <h5 class="font-bold text-lg mb-4">リンク</h5>
+              <ul class="space-y-2 text-gray-400">
+                <li><a href="#" class="hover:text-white">利用規約</a></li>
+                <li><a href="#" class="hover:text-white">プライバシーポリシー</a></li>
+                <li><a href="#" class="hover:text-white">お問い合わせ</a></li>
+              </ul>
+            </div>
+            <div>
+              <h5 class="font-bold text-lg mb-4">フォロー</h5>
+              <div class="flex space-x-4">
+                <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook text-2xl"></i></a>
+                <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter text-2xl"></i></a>
+                <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-instagram text-2xl"></i></a>
+              </div>
+            </div>
+          </div>
+          <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+            <p>&copy; 2026 FlightSearch. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
 
       {/* JavaScript */}
       <script src="/static/app.js"></script>
