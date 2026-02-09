@@ -126,36 +126,37 @@ async function searchFlights() {
 
 // Generate sample flight cards
 function generateSampleFlights(from, to, depDate, retDate) {
-  // Airline logos using AirHex CDN (実際にはAmadeus APIから取得)
+  // Airline logos - Using logo URLs from various CDNs (実際にはAmadeus APIから取得)
+  // Fallback: If logo fails to load, airline code will be displayed
   const airlines = [
     { 
       name: '全日空 (ANA)', 
       code: 'NH', 
-      logo: 'https://content.airhex.com/content/logos/airlines_NH_200_200_s.png',
+      logo: 'https://www.gstatic.com/flights/airline_logos/70px/NH.png',
       color: '#003366'
     },
     { 
       name: '日本航空 (JAL)', 
       code: 'JL', 
-      logo: 'https://content.airhex.com/content/logos/airlines_JL_200_200_s.png',
+      logo: 'https://www.gstatic.com/flights/airline_logos/70px/JL.png',
       color: '#DC143C'
     },
     { 
       name: 'ユナイテッド航空', 
       code: 'UA', 
-      logo: 'https://content.airhex.com/content/logos/airlines_UA_200_200_s.png',
+      logo: 'https://www.gstatic.com/flights/airline_logos/70px/UA.png',
       color: '#004B87'
     },
     { 
       name: 'デルタ航空', 
       code: 'DL', 
-      logo: 'https://content.airhex.com/content/logos/airlines_DL_200_200_s.png',
+      logo: 'https://www.gstatic.com/flights/airline_logos/70px/DL.png',
       color: '#862633'
     },
     { 
       name: 'アメリカン航空', 
       code: 'AA', 
-      logo: 'https://content.airhex.com/content/logos/airlines_AA_200_200_s.png',
+      logo: 'https://www.gstatic.com/flights/airline_logos/70px/AA.png',
       color: '#0078D2'
     }
   ];

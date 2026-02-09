@@ -356,6 +356,88 @@ app.get('/', (c) => {
         </div>
       </footer>
 
+      <!-- Seat Class Selection Modal -->
+      <div id="seatClassModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="flex items-center justify-center min-h-screen p-4">
+          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl relative">
+            <!-- Modal Header -->
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-4 rounded-t-2xl">
+              <div class="flex items-center justify-between">
+                <h2 id="modalTitle" class="text-2xl font-bold">
+                  <span id="modalRouteInfo">東京 → ニューヨーク</span>
+                </h2>
+                <button 
+                  onclick="closeSeatClassModal()" 
+                  class="text-white hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition"
+                  aria-label="モーダルを閉じる"
+                >
+                  <i class="fas fa-times text-2xl"></i>
+                </button>
+              </div>
+              <div id="modalFlightInfo" class="mt-2 text-sm opacity-90">
+                フライト情報を読み込み中...
+              </div>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-6 max-h-[70vh] overflow-y-auto">
+              <!-- Outbound Flight Section -->
+              <div class="mb-8">
+                <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                  <i class="fas fa-plane-departure text-blue-600 mr-2"></i>
+                  往路便
+                </h3>
+                <div id="outboundSeatClasses" class="space-y-3">
+                  <!-- Seat class options will be inserted here -->
+                </div>
+              </div>
+
+              <!-- Return Flight Section -->
+              <div class="mb-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                  <i class="fas fa-plane-arrival text-blue-600 mr-2"></i>
+                  復路便
+                </h3>
+                <div id="returnSeatClasses" class="space-y-3">
+                  <!-- Seat class options will be inserted here -->
+                </div>
+              </div>
+
+              <!-- Total Price Summary -->
+              <div class="bg-blue-50 rounded-lg p-4 mt-6">
+                <div class="flex justify-between items-center">
+                  <div>
+                    <div class="text-sm text-gray-600">合計金額（1名あたり）</div>
+                    <div class="text-xs text-gray-500 mt-1">往復 • 税・手数料込み</div>
+                  </div>
+                  <div class="text-3xl font-bold text-blue-600" id="modalTotalPrice">¥0</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="border-t border-gray-200 px-6 py-4 bg-gray-50 rounded-b-2xl">
+              <div class="flex space-x-4">
+                <button 
+                  onclick="closeSeatClassModal()" 
+                  class="flex-1 bg-gray-200 text-gray-700 py-3 px-6 rounded-lg font-semibold hover:bg-gray-300 transition"
+                >
+                  キャンセル
+                </button>
+                <button 
+                  onclick="confirmSeatClassSelection()" 
+                  class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-6 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition shadow-lg hover:shadow-xl"
+                  disabled
+                  id="confirmSelectionBtn"
+                >
+                  予約を続ける
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* JavaScript */}
       <script src="/static/app.js"></script>
     </div>
