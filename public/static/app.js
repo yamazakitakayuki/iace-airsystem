@@ -8,6 +8,62 @@ let passengers = {
 // Multi-city flight counter
 let multiCityFlightCount = 2;
 
+// Master data for autocomplete (dummy data - will be replaced with Amadeus API)
+const airportMaster = [
+  // 日本
+  { code: 'NRT', city: '東京', airport: '成田国際空港', country: '日本', label: '東京 成田 (NRT)', searchText: '東京 tokyo narita nrt 成田' },
+  { code: 'HND', city: '東京', airport: '羽田空港', country: '日本', label: '東京 羽田 (HND)', searchText: '東京 tokyo haneda hnd 羽田' },
+  { code: 'KIX', city: '大阪', airport: '関西国際空港', country: '日本', label: '大阪 関西 (KIX)', searchText: '大阪 osaka kansai kix 関西' },
+  { code: 'ITM', city: '大阪', airport: '大阪国際空港（伊丹）', country: '日本', label: '大阪 伊丹 (ITM)', searchText: '大阪 osaka itami itm 伊丹' },
+  { code: 'NGO', city: '名古屋', airport: '中部国際空港', country: '日本', label: '名古屋 (NGO)', searchText: '名古屋 nagoya ngo 中部' },
+  { code: 'CTS', city: '札幌', airport: '新千歳空港', country: '日本', label: '札幌 (CTS)', searchText: '札幌 sapporo cts 新千歳' },
+  { code: 'FUK', city: '福岡', airport: '福岡空港', country: '日本', label: '福岡 (FUK)', searchText: '福岡 fukuoka fuk' },
+  { code: 'OKA', city: '那覇', airport: '那覇空港', country: '日本', label: '那覇 沖縄 (OKA)', searchText: '那覇 naha okinawa oka 沖縄' },
+  
+  // アメリカ
+  { code: 'JFK', city: 'ニューヨーク', airport: 'ジョン・F・ケネディ国際空港', country: 'アメリカ', label: 'ニューヨーク JFK (JFK)', searchText: 'ニューヨーク new york jfk kennedy' },
+  { code: 'EWR', city: 'ニューヨーク', airport: 'ニューアーク・リバティー国際空港', country: 'アメリカ', label: 'ニューヨーク ニューアーク (EWR)', searchText: 'ニューヨーク new york newark ewr' },
+  { code: 'LAX', city: 'ロサンゼルス', airport: 'ロサンゼルス国際空港', country: 'アメリカ', label: 'ロサンゼルス (LAX)', searchText: 'ロサンゼルス los angeles lax' },
+  { code: 'SFO', city: 'サンフランシスコ', airport: 'サンフランシスコ国際空港', country: 'アメリカ', label: 'サンフランシスコ (SFO)', searchText: 'サンフランシスコ san francisco sfo' },
+  { code: 'ORD', city: 'シカゴ', airport: "オヘア国際空港", country: 'アメリカ', label: 'シカゴ (ORD)', searchText: 'シカゴ chicago ord ohare' },
+  { code: 'SEA', city: 'シアトル', airport: 'シアトル・タコマ国際空港', country: 'アメリカ', label: 'シアトル (SEA)', searchText: 'シアトル seattle sea' },
+  { code: 'LAS', city: 'ラスベガス', airport: 'マッカラン国際空港', country: 'アメリカ', label: 'ラスベガス (LAS)', searchText: 'ラスベガス las vegas las' },
+  { code: 'HNL', city: 'ホノルル', airport: 'ダニエル・K・イノウエ国際空港', country: 'アメリカ', label: 'ホノルル ハワイ (HNL)', searchText: 'ホノルル honolulu hawaii hnl ハワイ' },
+  
+  // ヨーロッパ
+  { code: 'LHR', city: 'ロンドン', airport: 'ヒースロー空港', country: 'イギリス', label: 'ロンドン (LHR)', searchText: 'ロンドン london lhr heathrow' },
+  { code: 'CDG', city: 'パリ', airport: 'シャルル・ド・ゴール空港', country: 'フランス', label: 'パリ (CDG)', searchText: 'パリ paris cdg charles de gaulle' },
+  { code: 'FRA', city: 'フランクフルト', airport: 'フランクフルト空港', country: 'ドイツ', label: 'フランクフルト (FRA)', searchText: 'フランクフルト frankfurt fra' },
+  { code: 'AMS', city: 'アムステルダム', airport: 'スキポール空港', country: 'オランダ', label: 'アムステルダム (AMS)', searchText: 'アムステルダム amsterdam ams schiphol' },
+  { code: 'FCO', city: 'ローマ', airport: 'フィウミチーノ空港', country: 'イタリア', label: 'ローマ (FCO)', searchText: 'ローマ roma rome fco' },
+  { code: 'MAD', city: 'マドリード', airport: 'マドリード・バラハス空港', country: 'スペイン', label: 'マドリード (MAD)', searchText: 'マドリード madrid mad' },
+  
+  // アジア
+  { code: 'ICN', city: 'ソウル', airport: '仁川国際空港', country: '韓国', label: 'ソウル (ICN)', searchText: 'ソウル seoul icn incheon 仁川' },
+  { code: 'PEK', city: '北京', airport: '北京首都国際空港', country: '中国', label: '北京 (PEK)', searchText: '北京 beijing pek' },
+  { code: 'PVG', city: '上海', airport: '上海浦東国際空港', country: '中国', label: '上海 (PVG)', searchText: '上海 shanghai pvg' },
+  { code: 'HKG', city: '香港', airport: '香港国際空港', country: '香港', label: '香港 (HKG)', searchText: '香港 hong kong hkg' },
+  { code: 'TPE', city: '台北', airport: '桃園国際空港', country: '台湾', label: '台北 (TPE)', searchText: '台北 taipei tpe' },
+  { code: 'SIN', city: 'シンガポール', airport: 'チャンギ国際空港', country: 'シンガポール', label: 'シンガポール (SIN)', searchText: 'シンガポール singapore sin changi' },
+  { code: 'BKK', city: 'バンコク', airport: 'スワンナプーム国際空港', country: 'タイ', label: 'バンコク (BKK)', searchText: 'バンコク bangkok bkk' },
+  { code: 'SYD', city: 'シドニー', airport: 'シドニー空港', country: 'オーストラリア', label: 'シドニー (SYD)', searchText: 'シドニー sydney syd' },
+];
+
+const airlineMaster = [
+  { code: 'NH', name: '全日空', nameEn: 'ANA', country: '日本', label: 'ANA 全日空 (NH)', searchText: 'ana nh 全日空 all nippon airways' },
+  { code: 'JL', name: '日本航空', nameEn: 'JAL', country: '日本', label: 'JAL 日本航空 (JL)', searchText: 'jal jl 日本航空 japan airlines' },
+  { code: 'UA', name: 'ユナイテッド航空', nameEn: 'United Airlines', country: 'アメリカ', label: 'ユナイテッド航空 (UA)', searchText: 'ua united airlines ユナイテッド' },
+  { code: 'DL', name: 'デルタ航空', nameEn: 'Delta Air Lines', country: 'アメリカ', label: 'デルタ航空 (DL)', searchText: 'dl delta air lines デルタ' },
+  { code: 'AA', name: 'アメリカン航空', nameEn: 'American Airlines', country: 'アメリカ', label: 'アメリカン航空 (AA)', searchText: 'aa american airlines アメリカン' },
+  { code: 'BA', name: 'ブリティッシュ・エアウェイズ', nameEn: 'British Airways', country: 'イギリス', label: 'ブリティッシュ・エアウェイズ (BA)', searchText: 'ba british airways ブリティッシュ' },
+  { code: 'AF', name: 'エールフランス', nameEn: 'Air France', country: 'フランス', label: 'エールフランス (AF)', searchText: 'af air france エールフランス' },
+  { code: 'LH', name: 'ルフトハンザ・ドイツ航空', nameEn: 'Lufthansa', country: 'ドイツ', label: 'ルフトハンザ (LH)', searchText: 'lh lufthansa ルフトハンザ' },
+  { code: 'SQ', name: 'シンガポール航空', nameEn: 'Singapore Airlines', country: 'シンガポール', label: 'シンガポール航空 (SQ)', searchText: 'sq singapore airlines シンガポール' },
+  { code: 'TG', name: 'タイ国際航空', nameEn: 'Thai Airways', country: 'タイ', label: 'タイ国際航空 (TG)', searchText: 'tg thai airways タイ' },
+  { code: 'KE', name: '大韓航空', nameEn: 'Korean Air', country: '韓国', label: '大韓航空 (KE)', searchText: 'ke korean air 大韓航空' },
+  { code: 'CZ', name: '中国南方航空', nameEn: 'China Southern Airlines', country: '中国', label: '中国南方航空 (CZ)', searchText: 'cz china southern 中国南方航空' },
+];
+
 // Initialize date inputs with default values
 document.addEventListener('DOMContentLoaded', function() {
   // Set default dates (today + 7 days for departure, today + 14 days for return)
@@ -48,7 +104,123 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Cabin class change handler
   document.getElementById('cabinClass').addEventListener('change', updatePassengerDisplay);
+  
+  // Initialize autocomplete for location and airline fields
+  initializeAutocomplete('fromLocation', airportMaster);
+  initializeAutocomplete('toLocation', airportMaster);
+  initializeAutocomplete('preferredAirline', airlineMaster, true);
+  
+  // Initialize autocomplete for multi-city fields
+  initializeAutocomplete('multiCityFrom1', airportMaster);
+  initializeAutocomplete('multiCityTo1', airportMaster);
+  initializeAutocomplete('multiCityFrom2', airportMaster);
+  initializeAutocomplete('multiCityTo2', airportMaster);
 });
+
+// Initialize autocomplete functionality
+function initializeAutocomplete(inputId, masterData, isAirline = false) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  
+  // Create suggestion container
+  const suggestionsId = `${inputId}-suggestions`;
+  let suggestionsDiv = document.getElementById(suggestionsId);
+  
+  if (!suggestionsDiv) {
+    suggestionsDiv = document.createElement('div');
+    suggestionsDiv.id = suggestionsId;
+    suggestionsDiv.className = 'absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto hidden';
+    input.parentElement.appendChild(suggestionsDiv);
+  }
+  
+  // Input event handler
+  input.addEventListener('input', function() {
+    const query = this.value.toLowerCase().trim();
+    
+    if (query.length < 1) {
+      suggestionsDiv.classList.add('hidden');
+      return;
+    }
+    
+    // Filter master data
+    const filtered = masterData.filter(item => 
+      item.searchText.toLowerCase().includes(query)
+    ).slice(0, 10); // Limit to 10 results
+    
+    if (filtered.length === 0) {
+      suggestionsDiv.classList.add('hidden');
+      return;
+    }
+    
+    // Generate suggestions HTML
+    suggestionsDiv.innerHTML = filtered.map(item => `
+      <div class="suggestion-item px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0" data-code="${item.code}" data-label="${item.label}">
+        <div class="font-medium text-gray-800">${item.label}</div>
+        ${isAirline ? `<div class="text-xs text-gray-500">${item.nameEn}</div>` : `<div class="text-xs text-gray-500">${item.airport}</div>`}
+      </div>
+    `).join('');
+    
+    suggestionsDiv.classList.remove('hidden');
+    
+    // Add click handlers to suggestions
+    suggestionsDiv.querySelectorAll('.suggestion-item').forEach(item => {
+      item.addEventListener('click', function() {
+        input.value = this.dataset.label;
+        input.dataset.code = this.dataset.code;
+        suggestionsDiv.classList.add('hidden');
+      });
+    });
+  });
+  
+  // Close suggestions when clicking outside
+  document.addEventListener('click', function(e) {
+    if (e.target !== input && !suggestionsDiv.contains(e.target)) {
+      suggestionsDiv.classList.add('hidden');
+    }
+  });
+  
+  // Handle keyboard navigation
+  input.addEventListener('keydown', function(e) {
+    const items = suggestionsDiv.querySelectorAll('.suggestion-item');
+    if (items.length === 0) return;
+    
+    let currentIndex = Array.from(items).findIndex(item => item.classList.contains('selected'));
+    
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (currentIndex < items.length - 1) {
+        if (currentIndex >= 0) items[currentIndex].classList.remove('selected');
+        currentIndex++;
+        items[currentIndex].classList.add('selected');
+        items[currentIndex].scrollIntoView({ block: 'nearest' });
+      }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (currentIndex > 0) {
+        items[currentIndex].classList.remove('selected');
+        currentIndex--;
+        items[currentIndex].classList.add('selected');
+        items[currentIndex].scrollIntoView({ block: 'nearest' });
+      }
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (currentIndex >= 0) {
+        items[currentIndex].click();
+      }
+    } else if (e.key === 'Escape') {
+      suggestionsDiv.classList.add('hidden');
+    }
+  });
+}
+
+// Initialize autocomplete for multi-city fields
+function initializeMultiCityAutocomplete() {
+  document.querySelectorAll('.multi-city-from, .multi-city-to').forEach((input, index) => {
+    const uniqueId = `multi-city-${index}-${Date.now()}`;
+    input.id = uniqueId;
+    initializeAutocomplete(uniqueId, airportMaster);
+  });
+}
 
 // Update passenger count
 function updatePassenger(type, delta) {
@@ -172,6 +344,20 @@ function addMultiCityFlight() {
   `;
   
   container.insertAdjacentHTML('beforeend', flightHTML);
+  
+  // Initialize autocomplete for the newly added fields
+  const newFlight = container.lastElementChild;
+  const fromInput = newFlight.querySelector('.multi-city-from');
+  const toInput = newFlight.querySelector('.multi-city-to');
+  
+  // Give unique IDs
+  const uniqueId = `multi-city-flight-${multiCityFlightCount}`;
+  fromInput.id = `${uniqueId}-from`;
+  toInput.id = `${uniqueId}-to`;
+  
+  // Initialize autocomplete
+  initializeAutocomplete(fromInput.id, airportMaster);
+  initializeAutocomplete(toInput.id, airportMaster);
 }
 
 // Remove multi-city flight

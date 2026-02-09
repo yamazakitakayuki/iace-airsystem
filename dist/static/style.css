@@ -562,3 +562,31 @@ button:disabled {
   }
 }
 
+
+/* Autocomplete suggestions styling */
+.suggestion-item.selected {
+  background-color: #DBEAFE !important;
+}
+
+/* Smooth scrolling for suggestions */
+[id$="-suggestions"] {
+  scrollbar-width: thin;
+  scrollbar-color: #CBD5E0 #F7FAFC;
+}
+
+[id$="-suggestions"]::-webkit-scrollbar {
+  width: 6px;
+}
+
+[id$="-suggestions"]::-webkit-scrollbar-track {
+  background: #F7FAFC;
+}
+
+[id$="-suggestions"]::-webkit-scrollbar-thumb {
+  background-color: #CBD5E0;
+  border-radius: 3px;
+}
+
+[id$="-suggestions"]::-webkit-scrollbar-thumb:hover {
+  background-color: #A0AEC0;
+}

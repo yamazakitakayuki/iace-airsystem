@@ -126,6 +126,7 @@ app.get('/', (c) => {
                       <i class="fas fa-plane-departure absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                       <input 
                         type="text" 
+                        id="multiCityFrom1"
                         class="multi-city-from w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="東京 (TYO)"
                       />
@@ -137,6 +138,7 @@ app.get('/', (c) => {
                       <i class="fas fa-plane-arrival absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                       <input 
                         type="text" 
+                        id="multiCityTo1"
                         class="multi-city-to w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="ニューヨーク (JFK)"
                       />
@@ -167,6 +169,7 @@ app.get('/', (c) => {
                       <i class="fas fa-plane-departure absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                       <input 
                         type="text" 
+                        id="multiCityFrom2"
                         class="multi-city-from w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="ニューヨーク (JFK)"
                       />
@@ -178,6 +181,7 @@ app.get('/', (c) => {
                       <i class="fas fa-plane-arrival absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                       <input 
                         type="text" 
+                        id="multiCityTo2"
                         class="multi-city-to w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="ロサンゼルス (LAX)"
                       />
@@ -286,14 +290,12 @@ app.get('/', (c) => {
               <label class="block text-sm font-medium text-gray-700 mb-2">航空会社</label>
               <div class="relative">
                 <i class="fas fa-plane absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                <select id="preferredAirline" class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                  <option value="">すべて</option>
-                  <option value="NH">ANA (NH)</option>
-                  <option value="JL">JAL (JL)</option>
-                  <option value="UA">ユナイテッド航空 (UA)</option>
-                  <option value="DL">デルタ航空 (DL)</option>
-                  <option value="AA">アメリカン航空 (AA)</option>
-                </select>
+                <input 
+                  type="text" 
+                  id="preferredAirline"
+                  placeholder="すべて" 
+                  class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
               </div>
             </div>
 
