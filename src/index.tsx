@@ -656,13 +656,13 @@ app.get('/', (c) => {
                 </button>
                 <button 
                   type="button"
-                  onclick="proceedToPayment()" 
+                  onclick="proceedToConfirmation()" 
                   class="flex-1 md:flex-none bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 px-8 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition shadow-lg hover:shadow-xl"
                   disabled
-                  id="proceedPaymentBtn"
+                  id="proceedConfirmationBtn"
                 >
-                  <i class="fas fa-credit-card mr-2"></i>
-                  支払いへ進む
+                  <i class="fas fa-check-circle mr-2"></i>
+                  予約内容の確認
                 </button>
               </div>
             </div>
@@ -670,6 +670,443 @@ app.get('/', (c) => {
           </div>
           
           {/* Footer inside booking page */}
+          <footer class="bg-gray-800 text-white mt-auto">
+            <div class="container mx-auto px-4 py-8">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                  <h5 class="font-bold text-lg mb-4">FlightSearch</h5>
+                  <p class="text-gray-400">お得な航空券を簡単検索</p>
+                </div>
+                <div>
+                  <h5 class="font-bold text-lg mb-4">リンク</h5>
+                  <ul class="space-y-2 text-gray-400">
+                    <li><a href="#" class="hover:text-white">利用規約</a></li>
+                    <li><a href="#" class="hover:text-white">プライバシーポリシー</a></li>
+                    <li><a href="#" class="hover:text-white">お問い合わせ</a></li>
+                  </ul>
+                </div>
+                <div>
+                  <h5 class="font-bold text-lg mb-4">フォロー</h5>
+                  <div class="flex space-x-4">
+                    <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook text-2xl"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter text-2xl"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-instagram text-2xl"></i></a>
+                  </div>
+                </div>
+              </div>
+              <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2026 FlightSearch. All rights reserved.</p>
+              </div>
+            </div>
+          </footer>
+        </div>
+      </div>
+
+      {/* Booking Confirmation Review Page */}
+      <div id="confirmationPage" class="hidden fixed inset-0 bg-gradient-to-br from-blue-50 to-indigo-100 overflow-y-auto z-40">
+        <div class="min-h-screen flex flex-col">
+          <div class="container mx-auto px-4 py-8 flex-grow">
+            {/* Back Button */}
+            <button 
+              onclick="backToBooking()" 
+              class="mb-6 flex items-center text-blue-600 hover:text-blue-800 transition"
+            >
+              <i class="fas fa-arrow-left mr-2"></i>
+              座席選択に戻る
+            </button>
+
+            {/* Confirmation Header */}
+            <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+              <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-clipboard-check text-blue-600 mr-3"></i>
+                予約内容の最終確認
+              </h2>
+              <div class="bg-blue-50 border-l-4 border-blue-600 p-4 rounded">
+                <p class="text-sm text-gray-700">
+                  <i class="fas fa-info-circle text-blue-600 mr-2"></i>
+                  ご予約内容をご確認の上、お間違いがなければ「支払いへ進む」ボタンをクリックしてください。
+                </p>
+              </div>
+            </div>
+
+            {/* Flight and Seat Summary */}
+            <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+              <h3 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-plane text-blue-600 mr-2"></i>
+                フライト情報
+              </h3>
+              <div id="confirmationFlightSummary" class="space-y-4">
+                {/* Flight summary will be inserted here */}
+              </div>
+            </div>
+
+            {/* Passenger Information Summary */}
+            <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+              <h3 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-users text-blue-600 mr-2"></i>
+                お客様情報
+              </h3>
+              <div id="confirmationPassengerSummary" class="space-y-4">
+                {/* Passenger summary will be inserted here */}
+              </div>
+            </div>
+
+            {/* Contact Information Summary */}
+            <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+              <h3 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-envelope text-blue-600 mr-2"></i>
+                連絡先情報
+              </h3>
+              <div id="confirmationContactSummary" class="space-y-2">
+                {/* Contact summary will be inserted here */}
+              </div>
+            </div>
+
+            {/* Price Summary and Submit */}
+            <div class="bg-white rounded-2xl shadow-xl p-6 sticky bottom-4">
+              <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+                <div>
+                  <div class="text-sm text-gray-600 mb-1">お支払い合計金額</div>
+                  <div class="text-4xl font-bold text-blue-600" id="confirmationTotalPrice">¥0</div>
+                  <div class="text-xs text-gray-500 mt-1">
+                    <span id="confirmationPassengersCount">1</span>名分 • 往復 • 税・手数料込み
+                  </div>
+                </div>
+                <div class="flex space-x-4 w-full md:w-auto">
+                  <button 
+                    type="button"
+                    onclick="backToBooking()" 
+                    class="flex-1 md:flex-none bg-gray-200 text-gray-700 py-4 px-8 rounded-lg font-semibold hover:bg-gray-300 transition"
+                  >
+                    戻る
+                  </button>
+                  <button 
+                    type="button"
+                    onclick="proceedToPayment()" 
+                    class="flex-1 md:flex-none bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 px-8 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition shadow-lg hover:shadow-xl"
+                    id="proceedPaymentBtn"
+                  >
+                    <i class="fas fa-credit-card mr-2"></i>
+                    支払いへ進む
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer inside confirmation page */}
+          <footer class="bg-gray-800 text-white mt-auto">
+            <div class="container mx-auto px-4 py-8">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                  <h5 class="font-bold text-lg mb-4">FlightSearch</h5>
+                  <p class="text-gray-400">お得な航空券を簡単検索</p>
+                </div>
+                <div>
+                  <h5 class="font-bold text-lg mb-4">リンク</h5>
+                  <ul class="space-y-2 text-gray-400">
+                    <li><a href="#" class="hover:text-white">利用規約</a></li>
+                    <li><a href="#" class="hover:text-white">プライバシーポリシー</a></li>
+                    <li><a href="#" class="hover:text-white">お問い合わせ</a></li>
+                  </ul>
+                </div>
+                <div>
+                  <h5 class="font-bold text-lg mb-4">フォロー</h5>
+                  <div class="flex space-x-4">
+                    <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook text-2xl"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter text-2xl"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-instagram text-2xl"></i></a>
+                  </div>
+                </div>
+              </div>
+              <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2026 FlightSearch. All rights reserved.</p>
+              </div>
+            </div>
+          </footer>
+        </div>
+      </div>
+
+      {/* Payment Page (Stripe-style) */}
+      <div id="paymentPage" class="hidden fixed inset-0 bg-gradient-to-br from-blue-50 to-indigo-100 overflow-y-auto z-40">
+        <div class="min-h-screen flex flex-col">
+          <div class="container mx-auto px-4 py-8 flex-grow max-w-4xl">
+            {/* Back Button */}
+            <button 
+              onclick="backToConfirmation()" 
+              class="mb-6 flex items-center text-blue-600 hover:text-blue-800 transition"
+            >
+              <i class="fas fa-arrow-left mr-2"></i>
+              予約内容の確認に戻る
+            </button>
+
+            {/* Payment Header */}
+            <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+              <div class="flex items-center justify-between mb-4">
+                <h2 class="text-3xl font-bold text-gray-800 flex items-center">
+                  <i class="fas fa-lock text-blue-600 mr-3"></i>
+                  安全な決済
+                </h2>
+                <div class="flex items-center space-x-2">
+                  <i class="fab fa-cc-visa text-3xl text-blue-600"></i>
+                  <i class="fab fa-cc-mastercard text-3xl text-orange-600"></i>
+                  <i class="fab fa-cc-amex text-3xl text-blue-500"></i>
+                  <i class="fab fa-cc-jcb text-3xl text-red-600"></i>
+                </div>
+              </div>
+              <div class="bg-green-50 border-l-4 border-green-600 p-4 rounded">
+                <p class="text-sm text-gray-700">
+                  <i class="fas fa-shield-alt text-green-600 mr-2"></i>
+                  このページの情報は、SSL/TLS暗号化技術により保護されています。
+                </p>
+              </div>
+            </div>
+
+            {/* Order Summary */}
+            <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+              <h3 class="text-xl font-bold text-gray-800 mb-4">ご注文内容</h3>
+              <div class="space-y-3">
+                <div class="flex justify-between text-gray-700">
+                  <span>フライト料金</span>
+                  <span id="paymentFlightPrice">¥0</span>
+                </div>
+                <div class="flex justify-between text-gray-700">
+                  <span>座席アップグレード</span>
+                  <span id="paymentSeatUpgrade">¥0</span>
+                </div>
+                <div class="flex justify-between text-gray-700">
+                  <span>税金・手数料</span>
+                  <span id="paymentTaxes">¥0</span>
+                </div>
+                <div class="border-t border-gray-300 pt-3 flex justify-between items-center">
+                  <span class="text-xl font-bold text-gray-800">合計</span>
+                  <span class="text-2xl font-bold text-blue-600" id="paymentTotalPrice">¥0</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Payment Form */}
+            <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+              <h3 class="text-xl font-bold text-gray-800 mb-6">お支払い情報</h3>
+              <form id="paymentForm" class="space-y-6">
+                {/* Card Number */}
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">カード番号</label>
+                  <div class="relative">
+                    <input 
+                      type="text" 
+                      placeholder="1234 5678 9012 3456"
+                      pattern="[0-9\s]{13,19}"
+                      maxlength="19"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
+                    />
+                    <i class="fas fa-credit-card absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                  </div>
+                </div>
+
+                {/* Expiry and CVV */}
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">有効期限</label>
+                    <input 
+                      type="text" 
+                      placeholder="MM/YY"
+                      pattern="(0[1-9]|1[0-2])\/[0-9]{2}"
+                      maxlength="5"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">セキュリティコード</label>
+                    <input 
+                      type="text" 
+                      placeholder="CVV"
+                      pattern="[0-9]{3,4}"
+                      maxlength="4"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Cardholder Name */}
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">カード名義人</label>
+                  <input 
+                    type="text" 
+                    placeholder="TARO YAMADA"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                {/* Billing Address */}
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">請求先住所</label>
+                  <input 
+                    type="text" 
+                    placeholder="東京都渋谷区..."
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+              </form>
+            </div>
+
+            {/* Payment Actions */}
+            <div class="bg-white rounded-2xl shadow-xl p-6 sticky bottom-4">
+              <div class="flex space-x-4">
+                <button 
+                  type="button"
+                  onclick="backToConfirmation()" 
+                  class="flex-1 bg-gray-200 text-gray-700 py-4 px-8 rounded-lg font-semibold hover:bg-gray-300 transition"
+                >
+                  キャンセル
+                </button>
+                <button 
+                  type="button"
+                  onclick="completeBooking()" 
+                  class="flex-1 bg-gradient-to-r from-green-600 to-blue-600 text-white py-4 px-8 rounded-lg font-semibold hover:from-green-700 hover:to-blue-700 transition shadow-lg hover:shadow-xl"
+                >
+                  <i class="fas fa-lock mr-2"></i>
+                  <span id="paymentButtonText">¥0 を支払う</span>
+                </button>
+              </div>
+              <p class="text-xs text-gray-500 text-center mt-4">
+                <i class="fas fa-shield-alt mr-1"></i>
+                お客様の決済情報は暗号化され、安全に処理されます。
+              </p>
+            </div>
+          </div>
+
+          {/* Footer inside payment page */}
+          <footer class="bg-gray-800 text-white mt-auto">
+            <div class="container mx-auto px-4 py-8">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                  <h5 class="font-bold text-lg mb-4">FlightSearch</h5>
+                  <p class="text-gray-400">お得な航空券を簡単検索</p>
+                </div>
+                <div>
+                  <h5 class="font-bold text-lg mb-4">リンク</h5>
+                  <ul class="space-y-2 text-gray-400">
+                    <li><a href="#" class="hover:text-white">利用規約</a></li>
+                    <li><a href="#" class="hover:text-white">プライバシーポリシー</a></li>
+                    <li><a href="#" class="hover:text-white">お問い合わせ</a></li>
+                  </ul>
+                </div>
+                <div>
+                  <h5 class="font-bold text-lg mb-4">フォロー</h5>
+                  <div class="flex space-x-4">
+                    <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook text-2xl"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter text-2xl"></i></a>
+                    <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-instagram text-2xl"></i></a>
+                  </div>
+                </div>
+              </div>
+              <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2026 FlightSearch. All rights reserved.</p>
+              </div>
+            </div>
+          </footer>
+        </div>
+      </div>
+
+      {/* Booking Complete Page */}
+      <div id="completePage" class="hidden fixed inset-0 bg-gradient-to-br from-green-50 to-blue-100 overflow-y-auto z-40">
+        <div class="min-h-screen flex flex-col">
+          <div class="container mx-auto px-4 py-8 flex-grow max-w-4xl">
+            {/* Success Animation */}
+            <div class="bg-white rounded-2xl shadow-xl p-8 mb-6 text-center">
+              <div class="mb-6">
+                <div class="inline-flex items-center justify-center w-24 h-24 bg-green-100 rounded-full mb-4">
+                  <i class="fas fa-check-circle text-green-600 text-6xl"></i>
+                </div>
+                <h2 class="text-4xl font-bold text-gray-800 mb-2">予約が完了しました！</h2>
+                <p class="text-gray-600">ご予約ありがとうございます。予約確認メールをお送りしました。</p>
+              </div>
+
+              {/* Booking Reference */}
+              <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-6 mb-6">
+                <div class="text-sm text-gray-600 mb-2">予約番号</div>
+                <div class="text-3xl font-bold text-blue-600" id="bookingReference">ABC123456</div>
+                <p class="text-xs text-gray-500 mt-2">
+                  この予約番号は、予約の確認や変更に必要です。大切に保管してください。
+                </p>
+              </div>
+            </div>
+
+            {/* Booking Summary */}
+            <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+              <h3 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-plane text-blue-600 mr-2"></i>
+                フライト情報
+              </h3>
+              <div id="completeFlightSummary" class="space-y-4">
+                {/* Flight summary will be inserted here */}
+              </div>
+            </div>
+
+            {/* Next Steps */}
+            <div class="bg-white rounded-2xl shadow-xl p-6 mb-6">
+              <h3 class="text-xl font-bold text-gray-800 mb-4">次のステップ</h3>
+              <div class="space-y-4">
+                <div class="flex items-start space-x-3">
+                  <div class="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span class="text-blue-600 font-bold">1</span>
+                  </div>
+                  <div>
+                    <h4 class="font-semibold text-gray-800">予約確認メールを確認</h4>
+                    <p class="text-sm text-gray-600">ご登録のメールアドレスに予約詳細を送信しました。</p>
+                  </div>
+                </div>
+                <div class="flex items-start space-x-3">
+                  <div class="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span class="text-blue-600 font-bold">2</span>
+                  </div>
+                  <div>
+                    <h4 class="font-semibold text-gray-800">オンラインチェックイン</h4>
+                    <p class="text-sm text-gray-600">出発24時間前からオンラインチェックインが可能です。</p>
+                  </div>
+                </div>
+                <div class="flex items-start space-x-3">
+                  <div class="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span class="text-blue-600 font-bold">3</span>
+                  </div>
+                  <div>
+                    <h4 class="font-semibold text-gray-800">空港へ出発</h4>
+                    <p class="text-sm text-gray-600">出発の2時間前までに空港へお越しください。</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div class="bg-white rounded-2xl shadow-xl p-6">
+              <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
+                <button 
+                  type="button"
+                  onclick="downloadTicket()" 
+                  class="flex-1 bg-blue-600 text-white py-4 px-8 rounded-lg font-semibold hover:bg-blue-700 transition shadow-lg hover:shadow-xl"
+                >
+                  <i class="fas fa-download mr-2"></i>
+                  予約確認書をダウンロード
+                </button>
+                <button 
+                  type="button"
+                  onclick="returnToSearch()" 
+                  class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 px-8 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition shadow-lg hover:shadow-xl"
+                >
+                  <i class="fas fa-home mr-2"></i>
+                  検索トップに戻る
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer inside complete page */}
           <footer class="bg-gray-800 text-white mt-auto">
             <div class="container mx-auto px-4 py-8">
               <div class="grid grid-cols-1 md:grid-cols-3 gap-8">

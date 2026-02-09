@@ -1025,7 +1025,9 @@ function updateFinalTotalPrice() {
 
 // Update proceed button
 function updateProceedButton() {
-  const btn = document.getElementById('proceedPaymentBtn');
+  const btn = document.getElementById('proceedConfirmationBtn');
+  if (!btn) return;
+  
   const totalPassengers = passengers.adults + passengers.children + passengers.infants;
   const requiredSeats = totalPassengers * 2; // Outbound + Return
   const selectedSeats = bookingState.selectedSeats.outbound.length + bookingState.selectedSeats.return.length;
@@ -1071,8 +1073,8 @@ function backToSearch() {
   }
 }
 
-// Proceed to payment
-function proceedToPayment() {
+// Proceed to confirmation page
+function proceedToConfirmation() {
   // Validate form
   const form = document.getElementById('customerInfoForm');
   if (!form.checkValidity()) {
@@ -1113,26 +1115,235 @@ function proceedToPayment() {
     emergencyPhone: document.getElementById('emergencyPhone').value
   };
   
-  // Prepare final booking data
-  const finalBookingData = {
-    flight: bookingState.flight,
-    seatClasses: bookingState.seatClasses,
-    selectedSeats: bookingState.selectedSeats,
-    passengers: passengerData,
-    contact: contactData,
-    totalPrice: parseInt(document.getElementById('finalTotalPrice').textContent.replace(/[¥,]/g, ''))
-  };
+  // Store data for confirmation
+  bookingState.passengers = passengerData;
+  bookingState.contact = contactData;
+  bookingState.totalPrice = parseInt(document.getElementById('finalTotalPrice').textContent.replace(/[¥,]/g, ''));
   
-  console.log('Final booking data:', finalBookingData);
+  // Hide booking page
+  document.getElementById('bookingPage').classList.add('hidden');
   
-  // Show confirmation (will be replaced with actual payment flow)
+  // Show confirmation page
+  const confirmationPage = document.getElementById('confirmationPage');
+  confirmationPage.classList.remove('hidden');
+  
+  // Generate confirmation summary
+  generateConfirmationSummary();
+  
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Generate confirmation summary
+function generateConfirmationSummary() {
+  // Flight summary
+  const flightSummary = document.getElementById('confirmationFlightSummary');
+  flightSummary.innerHTML = `
+    <div class="border-l-4 border-blue-600 pl-4">
+      <div class="flex items-center justify-between mb-2">
+        <div class="font-semibold text-gray-800">往路便</div>
+        <div class="text-blue-600 font-bold">${bookingState.flight.flightNumber}</div>
+      </div>
+      <div class="text-gray-600 text-sm mb-1">
+        ${bookingState.flight.route.fromCity} (${bookingState.flight.route.from}) → 
+        ${bookingState.flight.route.toCity} (${bookingState.flight.route.to})
+      </div>
+      <div class="text-gray-600 text-sm mb-2">座席クラス: ${bookingState.seatClasses.outbound.name}</div>
+      <div class="text-gray-600 text-sm">選択座席: ${bookingState.selectedSeats.outbound.join(', ')}</div>
+    </div>
+    <div class="border-l-4 border-blue-600 pl-4 mt-4">
+      <div class="flex items-center justify-between mb-2">
+        <div class="font-semibold text-gray-800">復路便</div>
+        <div class="text-blue-600 font-bold">${bookingState.flight.flightNumber}</div>
+      </div>
+      <div class="text-gray-600 text-sm mb-1">
+        ${bookingState.flight.route.toCity} (${bookingState.flight.route.to}) → 
+        ${bookingState.flight.route.fromCity} (${bookingState.flight.route.from})
+      </div>
+      <div class="text-gray-600 text-sm mb-2">座席クラス: ${bookingState.seatClasses.return.name}</div>
+      <div class="text-gray-600 text-sm">選択座席: ${bookingState.selectedSeats.return.join(', ')}</div>
+    </div>
+  `;
+  
+  // Passenger summary
+  const passengerSummary = document.getElementById('confirmationPassengerSummary');
+  passengerSummary.innerHTML = bookingState.passengers.map((p, index) => `
+    <div class="border-l-4 border-green-600 pl-4 mb-3">
+      <div class="font-semibold text-gray-800 mb-1">乗客 ${index + 1}</div>
+      <div class="grid grid-cols-2 gap-2 text-sm text-gray-600">
+        <div>氏名: ${p.lastName} ${p.firstName}</div>
+        <div>性別: ${p.gender === 'male' ? '男性' : p.gender === 'female' ? '女性' : 'その他'}</div>
+        <div>生年月日: ${p.dob}</div>
+        <div>パスポート: ${p.passport}</div>
+        <div>国籍: ${p.nationality}</div>
+      </div>
+    </div>
+  `).join('');
+  
+  // Contact summary
+  const contactSummary = document.getElementById('confirmationContactSummary');
+  contactSummary.innerHTML = `
+    <div class="text-sm text-gray-700">
+      <div class="mb-2"><strong>メールアドレス:</strong> ${bookingState.contact.email}</div>
+      <div class="mb-2"><strong>電話番号:</strong> ${bookingState.contact.phone}</div>
+      ${bookingState.contact.emergencyName ? `<div class="mb-2"><strong>緊急連絡先:</strong> ${bookingState.contact.emergencyName} (${bookingState.contact.emergencyPhone})</div>` : ''}
+    </div>
+  `;
+  
+  // Update price
+  document.getElementById('confirmationTotalPrice').textContent = `¥${bookingState.totalPrice.toLocaleString()}`;
+  document.getElementById('confirmationPassengersCount').textContent = bookingState.passengers.length;
+}
+
+// Back to booking page
+function backToBooking() {
+  document.getElementById('confirmationPage').classList.add('hidden');
+  document.getElementById('bookingPage').classList.remove('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Proceed to payment
+function proceedToPayment() {
+  // Hide confirmation page
+  document.getElementById('confirmationPage').classList.add('hidden');
+  
+  // Show payment page
+  const paymentPage = document.getElementById('paymentPage');
+  paymentPage.classList.remove('hidden');
+  
+  // Calculate price breakdown
+  const flightPrice = Math.floor(bookingState.totalPrice * 0.85);
+  const seatUpgrade = Math.floor(bookingState.totalPrice * 0.05);
+  const taxes = bookingState.totalPrice - flightPrice - seatUpgrade;
+  
+  // Update payment page
+  document.getElementById('paymentFlightPrice').textContent = `¥${flightPrice.toLocaleString()}`;
+  document.getElementById('paymentSeatUpgrade').textContent = `¥${seatUpgrade.toLocaleString()}`;
+  document.getElementById('paymentTaxes').textContent = `¥${taxes.toLocaleString()}`;
+  document.getElementById('paymentTotalPrice').textContent = `¥${bookingState.totalPrice.toLocaleString()}`;
+  document.getElementById('paymentButtonText').textContent = `¥${bookingState.totalPrice.toLocaleString()} を支払う`;
+  
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Back to confirmation page
+function backToConfirmation() {
+  document.getElementById('paymentPage').classList.add('hidden');
+  document.getElementById('confirmationPage').classList.remove('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Complete booking
+function completeBooking() {
+  // Validate payment form
+  const form = document.getElementById('paymentForm');
+  if (!form.checkValidity()) {
+    alert('すべての必須項目を入力してください。');
+    form.reportValidity();
+    return;
+  }
+  
+  // Show loading
+  const btn = event.target;
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>処理中...';
+  btn.disabled = true;
+  
+  // Simulate payment processing
+  setTimeout(() => {
+    // Generate booking reference
+    const reference = 'FL' + Math.random().toString(36).substring(2, 10).toUpperCase();
+    bookingState.bookingReference = reference;
+    
+    // Hide payment page
+    document.getElementById('paymentPage').classList.add('hidden');
+    
+    // Show complete page
+    const completePage = document.getElementById('completePage');
+    completePage.classList.remove('hidden');
+    
+    // Update complete page
+    document.getElementById('bookingReference').textContent = reference;
+    
+    // Generate flight summary for complete page
+    const flightSummary = document.getElementById('completeFlightSummary');
+    flightSummary.innerHTML = `
+      <div class="border-l-4 border-blue-600 pl-4">
+        <div class="flex items-center justify-between mb-2">
+          <div class="font-semibold text-gray-800">往路便</div>
+          <div class="text-blue-600 font-bold">${bookingState.flight.flightNumber}</div>
+        </div>
+        <div class="text-gray-600 text-sm mb-1">
+          ${bookingState.flight.route.fromCity} (${bookingState.flight.route.from}) → 
+          ${bookingState.flight.route.toCity} (${bookingState.flight.route.to})
+        </div>
+        <div class="text-gray-600 text-sm mb-2">座席: ${bookingState.selectedSeats.outbound.join(', ')}</div>
+      </div>
+      <div class="border-l-4 border-blue-600 pl-4 mt-4">
+        <div class="flex items-center justify-between mb-2">
+          <div class="font-semibold text-gray-800">復路便</div>
+          <div class="text-blue-600 font-bold">${bookingState.flight.flightNumber}</div>
+        </div>
+        <div class="text-gray-600 text-sm mb-1">
+          ${bookingState.flight.route.toCity} (${bookingState.flight.route.to}) → 
+          ${bookingState.flight.route.fromCity} (${bookingState.flight.route.from})
+        </div>
+        <div class="text-gray-600 text-sm mb-2">座席: ${bookingState.selectedSeats.return.join(', ')}</div>
+      </div>
+      <div class="mt-4 pt-4 border-t border-gray-200">
+        <div class="flex justify-between items-center">
+          <span class="font-semibold text-gray-800">お支払い金額</span>
+          <span class="text-2xl font-bold text-blue-600">¥${bookingState.totalPrice.toLocaleString()}</span>
+        </div>
+      </div>
+    `;
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    console.log('Booking completed:', bookingState);
+  }, 2000);
+}
+
+// Download ticket (dummy)
+function downloadTicket() {
   alert(
-    `予約が確定しました！\n\n` +
-    `フライト: ${finalBookingData.flight.flightNumber}\n` +
-    `乗客数: ${totalPassengers}名\n` +
-    `合計金額: ¥${finalBookingData.totalPrice.toLocaleString()}\n\n` +
-    `※ Amadeus API統合後、実際の決済処理が実装されます`
+    `予約確認書\n\n` +
+    `予約番号: ${bookingState.bookingReference}\n` +
+    `フライト: ${bookingState.flight.flightNumber}\n` +
+    `乗客数: ${bookingState.passengers.length}名\n` +
+    `合計金額: ¥${bookingState.totalPrice.toLocaleString()}\n\n` +
+    `※ 実際の実装では、PDFファイルがダウンロードされます。`
   );
+}
+
+// Return to search
+function returnToSearch() {
+  // Hide complete page
+  document.getElementById('completePage').classList.add('hidden');
+  
+  // Show main content and footer
+  const mainContent = document.getElementById('mainContent');
+  const mainFooter = document.getElementById('mainFooter');
+  if (mainContent) mainContent.classList.remove('hidden');
+  if (mainFooter) mainFooter.classList.remove('hidden');
+  
+  // Reset booking state
+  bookingState.flight = null;
+  bookingState.seatClasses = { outbound: null, return: null };
+  bookingState.selectedSeats = { outbound: [], return: [] };
+  bookingState.passengers = [];
+  bookingState.contact = null;
+  bookingState.totalPrice = 0;
+  bookingState.bookingReference = null;
+  
+  // Clear search results
+  const searchResults = document.getElementById('searchResults');
+  if (searchResults) searchResults.classList.add('hidden');
+  
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // Keyboard accessibility for modal
