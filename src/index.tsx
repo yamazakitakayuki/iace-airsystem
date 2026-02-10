@@ -557,6 +557,246 @@ app.get('/', (c) => {
         </div>
       </div>
 
+      {/* Authentication Selection Page */}
+      <div id="authSelectionPage" class="hidden fixed inset-0 bg-gradient-to-br from-blue-50 to-indigo-100 overflow-y-auto z-40">
+        <div class="min-h-screen flex items-center justify-center p-4">
+          <div class="max-w-2xl w-full bg-white rounded-2xl shadow-2xl p-8">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2 text-center">
+              <i class="fas fa-user-circle text-blue-600 mr-2"></i>
+              予約を続ける
+            </h2>
+            <p class="text-gray-600 text-center mb-8">
+              予約を続けるには、会員登録またはログインが必要です
+            </p>
+
+            <div class="space-y-4">
+              {/* New Registration Button */}
+              <button
+                onclick="showRegistrationPage()"
+                class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 px-6 rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center group"
+              >
+                <i class="fas fa-user-plus mr-3 text-xl group-hover:scale-110 transition-transform"></i>
+                <span class="text-lg font-semibold">新規登録</span>
+              </button>
+
+              {/* Login Button */}
+              <button
+                onclick="showLoginPage()"
+                class="w-full bg-white border-2 border-blue-600 text-blue-600 py-4 px-6 rounded-xl hover:bg-blue-50 transition-all duration-200 flex items-center justify-center group"
+              >
+                <i class="fas fa-sign-in-alt mr-3 text-xl group-hover:scale-110 transition-transform"></i>
+                <span class="text-lg font-semibold">ログイン</span>
+              </button>
+
+              {/* Guest Booking Button */}
+              <button
+                onclick="showBookingPageAsGuest()"
+                class="w-full bg-gray-100 border-2 border-gray-300 text-gray-700 py-4 px-6 rounded-xl hover:bg-gray-200 transition-all duration-200 flex items-center justify-center group"
+              >
+                <i class="fas fa-user mr-3 text-xl group-hover:scale-110 transition-transform"></i>
+                <span class="text-lg font-semibold">ゲストとして予約</span>
+              </button>
+            </div>
+
+            <div class="mt-6 text-center">
+              <button
+                onclick="backToFlightResults()"
+                class="text-gray-600 hover:text-gray-800 transition"
+              >
+                <i class="fas fa-arrow-left mr-2"></i>
+                戻る
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Registration Page */}
+      <div id="registrationPage" class="hidden fixed inset-0 bg-gradient-to-br from-blue-50 to-indigo-100 overflow-y-auto z-40">
+        <div class="min-h-screen flex items-center justify-center p-4">
+          <div class="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">
+              <i class="fas fa-user-plus text-blue-600 mr-2"></i>
+              新規会員登録
+            </h2>
+
+            {/* Email Input Step */}
+            <div id="emailStep">
+              <p class="text-gray-600 mb-6 text-center">
+                メールアドレスを入力してください。<br/>
+                確認コードを送信します。
+              </p>
+              
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    メールアドレス
+                  </label>
+                  <input
+                    type="email"
+                    id="registrationEmail"
+                    placeholder="example@email.com"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <button
+                  onclick="sendVerificationCode()"
+                  class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-6 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                >
+                  <i class="fas fa-paper-plane mr-2"></i>
+                  確認コードを送信
+                </button>
+              </div>
+            </div>
+
+            {/* OTP Verification Step */}
+            <div id="otpStep" class="hidden">
+              <p class="text-gray-600 mb-2 text-center">
+                確認コードを送信しました
+              </p>
+              <p class="text-sm text-gray-500 mb-6 text-center" id="sentToEmail">
+                example@email.com
+              </p>
+              
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    6桁の確認コード
+                  </label>
+                  <input
+                    type="text"
+                    id="verificationCode"
+                    placeholder="000000"
+                    maxlength="6"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center text-2xl tracking-widest font-mono"
+                  />
+                </div>
+
+                <button
+                  onclick="verifyCode()"
+                  class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-6 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                >
+                  <i class="fas fa-check mr-2"></i>
+                  確認
+                </button>
+
+                <button
+                  onclick="resendVerificationCode()"
+                  class="w-full text-blue-600 hover:text-blue-800 py-2 text-sm"
+                >
+                  <i class="fas fa-redo mr-2"></i>
+                  確認コードを再送信
+                </button>
+              </div>
+            </div>
+
+            <div class="mt-6 text-center">
+              <button
+                onclick="backToAuthSelection()"
+                class="text-gray-600 hover:text-gray-800 transition"
+              >
+                <i class="fas fa-arrow-left mr-2"></i>
+                戻る
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Login Page */}
+      <div id="loginPage" class="hidden fixed inset-0 bg-gradient-to-br from-blue-50 to-indigo-100 overflow-y-auto z-40">
+        <div class="min-h-screen flex items-center justify-center p-4">
+          <div class="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">
+              <i class="fas fa-sign-in-alt text-blue-600 mr-2"></i>
+              ログイン
+            </h2>
+
+            <p class="text-gray-600 mb-6 text-center">
+              登録済みのメールアドレスを入力してください。<br/>
+              確認コードを送信します。
+            </p>
+            
+            {/* Email Input Step */}
+            <div id="loginEmailStep">
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    メールアドレス
+                  </label>
+                  <input
+                    type="email"
+                    id="loginEmail"
+                    placeholder="example@email.com"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <button
+                  onclick="sendLoginCode()"
+                  class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-6 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                >
+                  <i class="fas fa-paper-plane mr-2"></i>
+                  確認コードを送信
+                </button>
+              </div>
+            </div>
+
+            {/* OTP Verification Step */}
+            <div id="loginOtpStep" class="hidden">
+              <p class="text-gray-600 mb-2 text-center">
+                確認コードを送信しました
+              </p>
+              <p class="text-sm text-gray-500 mb-6 text-center" id="loginSentToEmail">
+                example@email.com
+              </p>
+              
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    6桁の確認コード
+                  </label>
+                  <input
+                    type="text"
+                    id="loginVerificationCode"
+                    placeholder="000000"
+                    maxlength="6"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center text-2xl tracking-widest font-mono"
+                  />
+                </div>
+
+                <button
+                  onclick="verifyLoginCode()"
+                  class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-6 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                >
+                  <i class="fas fa-check mr-2"></i>
+                  ログイン
+                </button>
+
+                <button
+                  onclick="resendLoginCode()"
+                  class="w-full text-blue-600 hover:text-blue-800 py-2 text-sm"
+                >
+                  <i class="fas fa-redo mr-2"></i>
+                  確認コードを再送信
+                </button>
+              </div>
+            </div>
+
+            <div class="mt-6 text-center">
+              <button
+                onclick="backToAuthSelection()"
+                class="text-gray-600 hover:text-gray-800 transition"
+              >
+                <i class="fas fa-arrow-left mr-2"></i>
+                戻る
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Booking Confirmation Page */}
       <div id="bookingPage" class="hidden fixed inset-0 bg-gradient-to-br from-blue-50 to-indigo-100 overflow-y-auto z-40">
         <div class="min-h-screen flex flex-col">

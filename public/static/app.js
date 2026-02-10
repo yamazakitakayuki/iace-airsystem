@@ -847,8 +847,8 @@ function confirmSeatClassSelection() {
   // Close modal
   closeSeatClassModal();
   
-  // Show booking page
-  showBookingPage();
+  // Show authentication selection page
+  showAuthSelectionPage();
 }
 
 // Show booking page
@@ -1669,3 +1669,367 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
+
+// ============================================
+// Authentication & Registration Functions
+// ============================================
+
+// User session state
+let userSession = {
+  isAuthenticated: false,
+  isGuest: false,
+  email: null,
+  userId: null
+};
+
+// OTP storage (in production, this would be server-side)
+let otpStorage = {
+  code: null,
+  email: null,
+  expiresAt: null
+};
+
+// Show authentication selection page
+function showAuthSelectionPage() {
+  console.log('Showing authentication selection page');
+  
+  const mainContent = document.getElementById('mainContent');
+  const mainFooter = document.getElementById('mainFooter');
+  const authSelectionPage = document.getElementById('authSelectionPage');
+  
+  if (mainContent) mainContent.classList.add('hidden');
+  if (mainFooter) mainFooter.classList.add('hidden');
+  if (authSelectionPage) {
+    authSelectionPage.classList.remove('hidden');
+    window.scrollTo(0, 0);
+  }
+}
+
+// Show registration page
+function showRegistrationPage() {
+  console.log('Showing registration page');
+  
+  const authSelectionPage = document.getElementById('authSelectionPage');
+  const registrationPage = document.getElementById('registrationPage');
+  
+  if (authSelectionPage) authSelectionPage.classList.add('hidden');
+  if (registrationPage) {
+    registrationPage.classList.remove('hidden');
+    
+    // Reset form
+    document.getElementById('registrationEmail').value = '';
+    document.getElementById('verificationCode').value = '';
+    document.getElementById('emailStep').classList.remove('hidden');
+    document.getElementById('otpStep').classList.add('hidden');
+    
+    window.scrollTo(0, 0);
+  }
+}
+
+// Show login page
+function showLoginPage() {
+  console.log('Showing login page');
+  
+  const authSelectionPage = document.getElementById('authSelectionPage');
+  const loginPage = document.getElementById('loginPage');
+  
+  if (authSelectionPage) authSelectionPage.classList.add('hidden');
+  if (loginPage) {
+    loginPage.classList.remove('hidden');
+    
+    // Reset form
+    document.getElementById('loginEmail').value = '';
+    document.getElementById('loginVerificationCode').value = '';
+    document.getElementById('loginEmailStep').classList.remove('hidden');
+    document.getElementById('loginOtpStep').classList.add('hidden');
+    
+    window.scrollTo(0, 0);
+  }
+}
+
+// Show booking page as guest
+function showBookingPageAsGuest() {
+  console.log('Proceeding as guest');
+  
+  userSession.isGuest = true;
+  userSession.isAuthenticated = false;
+  
+  const authSelectionPage = document.getElementById('authSelectionPage');
+  if (authSelectionPage) authSelectionPage.classList.add('hidden');
+  
+  showBookingPage();
+}
+
+// Back to authentication selection
+function backToAuthSelection() {
+  console.log('Back to auth selection');
+  
+  const registrationPage = document.getElementById('registrationPage');
+  const loginPage = document.getElementById('loginPage');
+  const authSelectionPage = document.getElementById('authSelectionPage');
+  
+  if (registrationPage) registrationPage.classList.add('hidden');
+  if (loginPage) loginPage.classList.add('hidden');
+  if (authSelectionPage) {
+    authSelectionPage.classList.remove('hidden');
+    window.scrollTo(0, 0);
+  }
+}
+
+// Back to flight results from auth selection
+function backToFlightResults() {
+  console.log('Back to flight results');
+  
+  const authSelectionPage = document.getElementById('authSelectionPage');
+  const mainContent = document.getElementById('mainContent');
+  const mainFooter = document.getElementById('mainFooter');
+  
+  if (authSelectionPage) authSelectionPage.classList.add('hidden');
+  if (mainContent) mainContent.classList.remove('hidden');
+  if (mainFooter) mainFooter.classList.remove('hidden');
+  
+  // Scroll to search results
+  const searchResults = document.getElementById('searchResults');
+  if (searchResults && !searchResults.classList.contains('hidden')) {
+    searchResults.scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+// Generate 6-digit OTP
+function generateOTP() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+// Send verification code for registration
+async function sendVerificationCode() {
+  const emailInput = document.getElementById('registrationEmail');
+  const email = emailInput.value.trim();
+  
+  // Validate email
+  if (!email) {
+    alert('メールアドレスを入力してください。');
+    return;
+  }
+  
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    alert('有効なメールアドレスを入力してください。');
+    return;
+  }
+  
+  // Generate OTP
+  const otp = generateOTP();
+  
+  // Store OTP (expires in 10 minutes)
+  otpStorage.code = otp;
+  otpStorage.email = email;
+  otpStorage.expiresAt = Date.now() + 10 * 60 * 1000;
+  
+  console.log('Generated OTP:', otp, 'for email:', email);
+  
+  // Mock email sending
+  try {
+    const result = await sendEmailMock(email, otp, 'registration');
+    
+    if (result.success) {
+      // Show OTP step
+      document.getElementById('emailStep').classList.add('hidden');
+      document.getElementById('otpStep').classList.remove('hidden');
+      document.getElementById('sentToEmail').textContent = email;
+      
+      // Show success message
+      alert(`確認コードを送信しました。\n\n【モック表示】\nメール: ${email}\n確認コード: ${otp}\n\n実際の運用では、このコードはメールで送信されます。`);
+    }
+  } catch (error) {
+    console.error('Error sending verification code:', error);
+    alert('確認コードの送信に失敗しました。もう一度お試しください。');
+  }
+}
+
+// Verify OTP for registration
+function verifyCode() {
+  const codeInput = document.getElementById('verificationCode');
+  const code = codeInput.value.trim();
+  
+  // Validate input
+  if (!code || code.length !== 6) {
+    alert('6桁の確認コードを入力してください。');
+    return;
+  }
+  
+  // Check if OTP expired
+  if (Date.now() > otpStorage.expiresAt) {
+    alert('確認コードの有効期限が切れました。新しいコードを送信してください。');
+    return;
+  }
+  
+  // Verify OTP
+  if (code === otpStorage.code) {
+    console.log('OTP verified successfully for:', otpStorage.email);
+    
+    // Set user session
+    userSession.isAuthenticated = true;
+    userSession.isGuest = false;
+    userSession.email = otpStorage.email;
+    userSession.userId = 'user_' + Date.now(); // Mock user ID
+    
+    // Clear OTP
+    otpStorage = { code: null, email: null, expiresAt: null };
+    
+    // Show success and proceed to booking
+    alert('会員登録が完了しました！\n予約を続けます。');
+    
+    const registrationPage = document.getElementById('registrationPage');
+    if (registrationPage) registrationPage.classList.add('hidden');
+    
+    showBookingPage();
+  } else {
+    alert('確認コードが正しくありません。もう一度お試しください。');
+  }
+}
+
+// Resend verification code
+function resendVerificationCode() {
+  if (otpStorage.email) {
+    sendVerificationCode();
+  }
+}
+
+// Send login code
+async function sendLoginCode() {
+  const emailInput = document.getElementById('loginEmail');
+  const email = emailInput.value.trim();
+  
+  // Validate email
+  if (!email) {
+    alert('メールアドレスを入力してください。');
+    return;
+  }
+  
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    alert('有効なメールアドレスを入力してください。');
+    return;
+  }
+  
+  // Check if user exists (mock check)
+  // In production, this would be a backend API call
+  console.log('Checking if user exists:', email);
+  
+  // Generate OTP
+  const otp = generateOTP();
+  
+  // Store OTP
+  otpStorage.code = otp;
+  otpStorage.email = email;
+  otpStorage.expiresAt = Date.now() + 10 * 60 * 1000;
+  
+  console.log('Generated login OTP:', otp, 'for email:', email);
+  
+  // Mock email sending
+  try {
+    const result = await sendEmailMock(email, otp, 'login');
+    
+    if (result.success) {
+      // Show OTP step
+      document.getElementById('loginEmailStep').classList.add('hidden');
+      document.getElementById('loginOtpStep').classList.remove('hidden');
+      document.getElementById('loginSentToEmail').textContent = email;
+      
+      // Show success message
+      alert(`確認コードを送信しました。\n\n【モック表示】\nメール: ${email}\n確認コード: ${otp}\n\n実際の運用では、このコードはメールで送信されます。`);
+    }
+  } catch (error) {
+    console.error('Error sending login code:', error);
+    alert('確認コードの送信に失敗しました。もう一度お試しください。');
+  }
+}
+
+// Verify login code
+function verifyLoginCode() {
+  const codeInput = document.getElementById('loginVerificationCode');
+  const code = codeInput.value.trim();
+  
+  // Validate input
+  if (!code || code.length !== 6) {
+    alert('6桁の確認コードを入力してください。');
+    return;
+  }
+  
+  // Check if OTP expired
+  if (Date.now() > otpStorage.expiresAt) {
+    alert('確認コードの有効期限が切れました。新しいコードを送信してください。');
+    return;
+  }
+  
+  // Verify OTP
+  if (code === otpStorage.code) {
+    console.log('Login successful for:', otpStorage.email);
+    
+    // Set user session
+    userSession.isAuthenticated = true;
+    userSession.isGuest = false;
+    userSession.email = otpStorage.email;
+    userSession.userId = 'user_' + Date.now(); // Mock user ID
+    
+    // Clear OTP
+    otpStorage = { code: null, email: null, expiresAt: null };
+    
+    // Show success and proceed to booking
+    alert('ログインしました！\n予約を続けます。');
+    
+    const loginPage = document.getElementById('loginPage');
+    if (loginPage) loginPage.classList.add('hidden');
+    
+    showBookingPage();
+  } else {
+    alert('確認コードが正しくありません。もう一度お試しください。');
+  }
+}
+
+// Resend login code
+function resendLoginCode() {
+  if (otpStorage.email) {
+    sendLoginCode();
+  }
+}
+
+// Mock email sending function
+async function sendEmailMock(email, otp, type) {
+  console.log('=== MOCK EMAIL SENT ===');
+  console.log('To:', email);
+  console.log('Type:', type === 'registration' ? '会員登録' : 'ログイン');
+  console.log('OTP Code:', otp);
+  console.log('Sent at:', new Date().toLocaleString('ja-JP'));
+  console.log('Expires at:', new Date(Date.now() + 10 * 60 * 1000).toLocaleString('ja-JP'));
+  console.log('=======================');
+  
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+  // Mock email content
+  const emailContent = `
+    件名: ${type === 'registration' ? '[FlightSearch] 会員登録の確認コード' : '[FlightSearch] ログイン確認コード'}
+    
+    ${email} 様
+    
+    FlightSearch をご利用いただき、ありがとうございます。
+    
+    以下の確認コードを入力して、${type === 'registration' ? '会員登録' : 'ログイン'}を完了してください。
+    
+    確認コード: ${otp}
+    
+    このコードは10分間有効です。
+    
+    このメールに心当たりがない場合は、無視してください。
+    
+    FlightSearch サポートチーム
+  `;
+  
+  console.log('Email content:', emailContent);
+  
+  return {
+    success: true,
+    messageId: 'mock_' + Date.now()
+  };
+}
