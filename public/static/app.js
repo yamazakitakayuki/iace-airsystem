@@ -2081,6 +2081,68 @@ function resendVerificationCode() {
   }
 }
 
+// Sign in with Google (Mock implementation)
+async function signInWithGoogle() {
+  console.log('Sign in with Google initiated');
+  
+  // Show loading message
+  const loadingMessage = 'Googleアカウントでサインインしています...';
+  
+  // Mock Google OAuth flow
+  // In production, this would use Google Sign-In SDK or OAuth2
+  try {
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Mock Google user data
+    const mockGoogleUser = {
+      email: 'user@gmail.com',
+      name: 'Google User',
+      givenName: 'User',
+      familyName: 'Google',
+      picture: 'https://via.placeholder.com/96',
+      sub: 'google_' + Date.now() // Google user ID
+    };
+    
+    console.log('Google Sign-in successful:', mockGoogleUser);
+    
+    // Set user session
+    userSession.isAuthenticated = true;
+    userSession.isGuest = false;
+    userSession.email = mockGoogleUser.email;
+    userSession.userId = mockGoogleUser.sub;
+    userSession.name = mockGoogleUser.name;
+    userSession.provider = 'google';
+    
+    // Update user profile
+    userProfile.email = mockGoogleUser.email;
+    userProfile.lastName = mockGoogleUser.familyName;
+    userProfile.firstName = mockGoogleUser.givenName;
+    
+    // Store in sessionStorage
+    sessionStorage.setItem('userSession', JSON.stringify(userSession));
+    sessionStorage.setItem('userProfile', JSON.stringify(userProfile));
+    
+    // Show success message
+    alert(`Googleアカウントでサインインしました。\n\n【モック表示】\nメール: ${mockGoogleUser.email}\n名前: ${mockGoogleUser.name}\n\n実際の運用では、Google OAuth2を使用します。`);
+    
+    // Close auth pages and show booking page
+    const registrationPage = document.getElementById('registrationPage');
+    const loginPage = document.getElementById('loginPage');
+    const authSelectionPage = document.getElementById('authSelectionPage');
+    
+    if (registrationPage) registrationPage.classList.add('hidden');
+    if (loginPage) loginPage.classList.add('hidden');
+    if (authSelectionPage) authSelectionPage.classList.add('hidden');
+    
+    showBookingPage();
+    
+  } catch (error) {
+    console.error('Error signing in with Google:', error);
+    alert('Googleサインインに失敗しました。もう一度お試しください。');
+  }
+}
+
 // Send login code
 async function sendLoginCode() {
   const emailInput = document.getElementById('loginEmail');
