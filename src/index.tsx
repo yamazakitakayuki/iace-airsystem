@@ -1,7 +1,14 @@
 import { Hono } from 'hono'
+import { basicAuth } from 'hono/basic-auth'
 import { renderer } from './renderer'
 
 const app = new Hono()
+
+// Basic Authentication Middleware
+app.use('*', basicAuth({
+  username: 'admin',
+  password: 'demo2026'
+}))
 
 app.use(renderer)
 
